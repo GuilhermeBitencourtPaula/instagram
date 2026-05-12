@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { createSearch, getUserSearches, deleteSearch, processSearch } from '../controllers/search.controller';
+import { createSearch, getUserSearches, deleteSearch, processSearch, getStats, toggleFavorite } from '../controllers/search.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
+import { cacheMiddleware } from '../middlewares/cache.middleware';
 
 const router = Router();
 
@@ -16,7 +17,10 @@ router.post('/:id/process', processSearch);
 // @route GET /api/searches
 router.get('/', getUserSearches);
 
-// @route DELETE /api/searches/:id
-router.delete('/:id', deleteSearch);
+// @route GET /api/searches/stats
+router.get('/stats', cacheMiddleware(600), getStats);
+
+// @route PATCH /api/searches/:id/favorite
+router.patch('/:id/favorite', toggleFavorite);
 
 export default router;

@@ -8,69 +8,118 @@ import logger from './utils/logger';
 import { connectWithRetry, checkDatabaseHealth } from './database/connection';
 import authRoutes from './routes/auth.routes';
 import searchRoutes from './routes/search.routes';
+import instagramRoutes from './routes/instagram.routes';
+import profileRoutes from './routes/profile.routes';
+import { initScheduler } from './services/scheduler.service';
 
 dotenv.config();
 
+// ── Validate required environment variables ──────────────────
+const REQUIRED_ENVS = ['DATABASE_URL', 'JWT_SECRET'];
+for (const key of REQUIRED_ENVS) {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Middleware
-app.use(express.json());
-app.use(cors());
+// ── Security Middleware ───────────────────────────────────────
 app.use(helmet());
 
-// Custom Morgan stream for Winston
-const stream = {
-  write: (message: string) => logger.http(message.trim()),
-};
-app.use(morgan('combined', { stream }));
+// CORS — allow frontend URL from env, fallback to localhost for dev
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3001',
+  'http://localhost:3000',
+].filter(Boolean) as string[];
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests, please try again later.',
-});
-app.use(limiter);
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o))) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  credentials: true,
+}));
 
-// Enhanced health check including database
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// ── Logging ───────────────────────────────────────────────────
+const stream = { write: (msg: string) => logger.http(msg.trim()) };
+app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev', { stream }));
+
+// ── Rate Limiting ─────────────────────────────────────────────
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+}));
+
+// ── Health check (Railway uses this to know the service is alive) ──
 app.get('/health', async (_req: Request, res: Response) => {
   try {
-    const dbHealthy = await checkDatabaseHealth();
-    res.status(200).json({ 
-      status: 'ok', 
-      database: dbHealthy ? 'connected' : 'disconnected',
-      timestamp: new Date().toISOString()
+    await checkDatabaseHealth();
+    res.status(200).json({
+      status: 'online',
+      env: NODE_ENV,
+      timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
     logger.error(`Health check failed: ${error.message}`);
-    res.status(503).json({ status: 'error', database: 'unreachable' });
+    res.status(503).json({ status: 'error', message: error.message });
   }
 });
 
-// Routes
+// ── API Routes ────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/searches', searchRoutes);
+app.use('/api/instagram', instagramRoutes);
+app.use('/api/profiles', profileRoutes);
 
-// Global Error Handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal Server Error',
-    },
+// ── 404 handler ───────────────────────────────────────────────
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// ── Global Error Handler ──────────────────────────────────────
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status || 500;
+  logger.error(`[${status}] ${err.message} — ${req.method} ${req.originalUrl}`);
+  res.status(status).json({
+    error: NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
   });
 });
 
-// Start function to ensure DB is connected before server
+// ── Startup ───────────────────────────────────────────────────
 async function startServer() {
   try {
+    logger.info(`🚀 Starting Instagram AI Agent (${NODE_ENV})...`);
     await connectWithRetry();
+
+    // Redis is optional — don't crash if unavailable
+    try {
+      const { connectRedis } = await import('./database/redis');
+      await connectRedis();
+    } catch (redisErr: any) {
+      logger.warn(`⚠️  Redis not available: ${redisErr.message}. Continuing without cache.`);
+    }
+
     app.listen(PORT, () => {
-      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+      logger.info(`✅ Server listening on port ${PORT}`);
+      initScheduler();
     });
   } catch (error: any) {
-    logger.error('Failed to start server due to database connection issues');
+    logger.error(`💥 Startup failed: ${error.message}`);
     process.exit(1);
   }
 }

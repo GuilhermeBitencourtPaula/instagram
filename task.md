@@ -1,0 +1,18 @@
+- [x] Create project root directories: /backend, /frontend, /database
+- [x] Initialize backend Node.js + TypeScript project in /backend
+- [x] Configure Prisma ORM and MySQL schema (15 models)
+- [x] Implement JWT authentication middleware and user routes
+- [x] Set up Express app with security middlewares
+- [x] Initialize frontend Next.js project in /frontend
+- [x] Build high-fidelity Login page with Framer Motion
+- [x] Implement frontend authentication state management (Zustand)
+- [x] Build dashboard layout and main navigation
+- [x] Create route modules for auth, searches and instagram
+- [x] Integrate OpenAI service for intelligent analysis
+- [x] Implement AI insights (summary, trends, niches, patterns)
+- [x] Build core Search UI and Results integration
+- [x] Connect frontend to backend APIs for the main search flow
+- [x] Implement scheduling (node-cron) for hashtag monitoring
+- [x] Populate Profiles and Analytics pages with real data
+- [x] Integrate Redis cache layer for API responses
+- [x] Perform final UI/UX polish and README documentation

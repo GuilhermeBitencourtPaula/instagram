@@ -21,37 +21,53 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
       caption: p.caption,
       likes: p.likesCount,
       comments: p.commentsCount,
-      type: p.mediaType
-    })).slice(0, 15); // limit to top 15 posts for context window
+      type: p.mediaType,
+      author: p.username
+    })).slice(0, 20);
 
     const prompt = `
-      Você é um especialista em Marketing Digital e Instagram. 
-      Analise os seguintes dados coletados de posts do Instagram para a busca: "${query}".
+      Você é um Consultor de Crescimento no Instagram e Cientista de Dados de Marketing.
+      Sua missão é analisar os seguintes dados reais coletados de posts do Instagram sobre o termo: "${query}".
       
-      Dados dos Posts:
+      DADOS BRUTOS:
       ${JSON.stringify(postsData)}
       
-      Responda em JSON com os seguintes campos:
-      - summary: Um resumo do que está sendo postado.
-      - detectedTrends: Tendências de conteúdo ou hashtags identificadas.
-      - suggestedNiche: Sugestão de sub-nicho lucrativo.
-      - viralPatterns: Padrões identificados nos posts com mais engajamento.
+      INSTRUÇÕES DE ANÁLISE:
+      1. Identifique o tom predominante (sentimento) do conteúdo.
+      2. Descubra padrões visuais ou de legenda que estão gerando mais engajamento (likes/comments ratio).
+      3. Liste hashtags secundárias que aparecem com frequência e são lucrativas.
+      4. Forneça um resumo executivo de 2 frases.
+      5. Sugira um sub-nicho específico que tenha baixa concorrência mas alto engajamento baseado nesses posts.
+
+      SAÍDA ESPERADA (JSON estrito):
+      {
+        "summary": "Resumo executivo impactante.",
+        "detectedTrends": "Lista de tendências e hashtags em destaque.",
+        "suggestedNiche": "Sub-nicho lucrativo específico com justificativa curta.",
+        "viralPatterns": "Análise técnica dos gatilhos de viralização encontrados nos posts top."
+      }
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { 
+          role: "system", 
+          content: "Você é um assistente especializado em inteligência de mercado para Instagram. Você sempre responde em JSON." 
+        },
+        { role: "user", content: prompt }
+      ],
       response_format: { type: "json_object" }
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-    logger.info(`Insights gerados com sucesso para a busca: ${query}`);
+    logger.info(`Insights refinados gerados com sucesso para: ${query}`);
     return result;
 
   } catch (error: any) {
-    logger.error(`Erro ao gerar insights com IA: ${error.message}`);
+    logger.error(`Erro ao gerar insights refinados: ${error.message}`);
     return {
-      summary: 'Erro ao processar insights com a IA.',
+      summary: 'Erro ao processar insights detalhados.',
       detectedTrends: 'N/A',
       suggestedNiche: 'N/A',
       viralPatterns: 'N/A',

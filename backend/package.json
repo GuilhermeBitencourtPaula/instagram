@@ -1,14 +1,19 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Instagram AI Agent — Backend API",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "npx prisma db push --accept-data-loss && node dist/server.js",
+    "start": "node dist/server.js",
     "postinstall": "prisma generate",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "db:push": "prisma db push --accept-data-loss",
+    "db:migrate": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
@@ -43,8 +48,5 @@
   },
   "devDependencies": {
     "ts-node": "^10.9.2"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   }
 }
