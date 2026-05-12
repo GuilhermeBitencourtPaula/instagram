@@ -164,7 +164,7 @@ export const getStats = async (req: Request, res: Response) => {
       totalPosts,
       totalInsights,
       avgEngagement: avgEngage._avg.likesCount ? (avgEngage._avg.likesCount / 100).toFixed(1) + '%' : '0%',
-      topTags: topTags.map(t => ({ name: t.name, count: t._count.searches }))
+      topTags: topTags.map((t: any) => ({ name: t.name, count: t._count.searches }))
     });
   } catch (error: any) {
     logger.error(`Erro ao buscar estatísticas: ${error.message}`);
