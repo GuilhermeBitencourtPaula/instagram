@@ -1,0 +1,33 @@
+"use client";
+
+import Sidebar from "./Sidebar";
+import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <div className="flex bg-[#09090b] min-h-screen text-white selection:bg-primary/30">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="p-8 pb-16"
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+    </div>
+  );
+}

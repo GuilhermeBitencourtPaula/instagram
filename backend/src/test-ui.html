@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Agent - Teste de Login</title>
+    <style>
+        :root {
+            --primary: #833ab4;
+            --secondary: #fd1d1d;
+            --accent: #fcb045;
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(131, 58, 180, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(253, 29, 29, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #response {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            background: #000;
+            border: 1px solid #333;
+        }
+
+        .success { border-left: 4px solid #10b981 !important; color: #10b981; }
+        .error { border-left: 4px solid #ef4444 !important; color: #ef4444; }
+
+        pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Instagram Agent</h1>
+        <p>Painel de Teste de Autenticação</p>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" value="admin@instagramagent.com" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" value="AdminSecurePassword123!" required>
+            </div>
+            
+            <button type="submit" id="btn">Logar no Sistema</button>
+        </form>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const responseDiv = document.getElementById('response');
+        const btn = document.getElementById('btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btn.disabled = true;
+            btn.innerText = 'Processando...';
+            responseDiv.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'success';
+                    responseDiv.innerHTML = `<strong>SUCESSO!</strong><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    console.log('Token:', data.token);
+                } else {
+                    responseDiv.className = 'error';
+                    responseDiv.innerHTML = `<strong>ERRO:</strong> ${data.message || 'Falha no login'}`;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'error';
+                responseDiv.innerHTML = `<strong>ERRO DE CONEXÃO:</strong> O servidor está rodando?`;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Logar no Sistema';
+            }
+        });
+    </script>
+</body>
+</html>
