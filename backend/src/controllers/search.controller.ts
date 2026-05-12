@@ -3,6 +3,8 @@ import prisma from '../database/connection';
 import logger from '../utils/logger';
 import { scrapeInstagramData } from '../services/scraper.service';
 import { generateSearchInsights } from '../services/ai.service';
+import * as instagramService from '../services/instagram.service';
+import { processSearchInternal } from '../services/search.service';
 
 export const createSearch = async (req: Request, res: Response) => {
   const { query, tagNames } = req.body;
@@ -84,6 +86,10 @@ export const processSearch = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.userId;
 
+  if (!userId) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+  }
+
   try {
     const search = await prisma.search.findFirst({
       where: { id: Number(id), userId }
@@ -93,62 +99,8 @@ export const processSearch = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Pesquisa não encontrada.' });
     }
 
-    // Update status to processing
-    await prisma.search.update({
-      where: { id: search.id },
-      data: { status: 'PROCESSING' }
-    });
-
-    // 1. Scrape Data (Mock)
-    const scrapedPosts = await scrapeInstagramData(search.query);
-
-    // 2. Save Data to Database
-    for (const post of scrapedPosts) {
-      // Find or create profile
-      const profile = await prisma.instagramProfile.upsert({
-        where: { username: post.username },
-        update: {},
-        create: { username: post.username }
-      });
-
-      // Create post
-      await prisma.post.upsert({
-        where: { instagramPostId: post.instagramPostId },
-        update: {},
-        create: {
-          searchId: search.id,
-          profileId: profile.id,
-          instagramPostId: post.instagramPostId,
-          caption: post.caption,
-          mediaUrl: post.mediaUrl,
-          mediaType: post.mediaType,
-          likesCount: post.likesCount,
-          commentsCount: post.commentsCount,
-          postedAt: post.postedAt
-        }
-      });
-    }
-
-    // 3. Generate AI Insights
-    const insights = await generateSearchInsights(search.query, scrapedPosts);
-
-    // 4. Save Insights
-    await prisma.aiInsight.create({
-      data: {
-        searchId: search.id,
-        summary: insights.summary,
-        detectedTrends: insights.detectedTrends,
-        suggestedNiche: insights.suggestedNiche,
-        viralPatterns: insights.viralPatterns
-      }
-    });
-
-    // 5. Update Status to Completed
-    const updatedSearch = await prisma.search.update({
-      where: { id: search.id },
-      data: { status: 'COMPLETED' },
-      include: { insights: true, posts: true }
-    });
+    // Use the shared service logic
+    const updatedSearch = await processSearchInternal(Number(id), userId);
 
     res.status(200).json({ 
       message: 'Processamento concluído com sucesso.',
@@ -157,13 +109,87 @@ export const processSearch = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     logger.error(`Erro no processamento da pesquisa ${id}: ${error.message}`);
-    
-    await prisma.search.update({
-      where: { id: Number(id) },
-      data: { status: 'FAILED' }
-    });
-
-    res.status(500).json({ message: 'Erro ao processar pesquisa.' });
+    res.status(500).json({ message: error.message || 'Erro ao processar pesquisa.' });
   }
 };
 
+
+export const getStats = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  try {
+    const totalSearches = await prisma.search.count({
+      where: { userId, deletedAt: null }
+    });
+
+    const totalPosts = await prisma.post.count({
+      where: { search: { userId, deletedAt: null } }
+    });
+
+    const totalInsights = await prisma.aiInsight.count({
+      where: { search: { userId, deletedAt: null } }
+    });
+
+    // Calculate average engagement (simplified)
+    const avgEngage = await prisma.post.aggregate({
+      where: { search: { userId, deletedAt: null } },
+      _avg: {
+        likesCount: true
+      }
+    });
+
+    // Get Top Hashtags (Tags)
+    const topTags = await prisma.tag.findMany({
+      where: {
+        searches: {
+          some: {
+            userId,
+            deletedAt: null
+          }
+        }
+      },
+      include: {
+        _count: {
+          select: { searches: true }
+        }
+      },
+      orderBy: {
+        searches: { _count: 'desc' }
+      },
+      take: 5
+    });
+
+    res.status(200).json({
+      totalSearches,
+      totalPosts,
+      totalInsights,
+      avgEngagement: avgEngage._avg.likesCount ? (avgEngage._avg.likesCount / 100).toFixed(1) + '%' : '0%',
+      topTags: topTags.map(t => ({ name: t.name, count: t._count.searches }))
+    });
+  } catch (error: any) {
+    logger.error(`Erro ao buscar estatísticas: ${error.message}`);
+    res.status(500).json({ message: 'Erro ao carregar estatísticas.' });
+  }
+};
+
+export const toggleFavorite = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { isFavorite } = req.body;
+  const userId = req.user?.userId;
+
+  try {
+    const updatedSearch = await prisma.search.updateMany({
+      where: { id: Number(id), userId },
+      data: { isFavorite }
+    });
+
+    if (updatedSearch.count === 0) {
+      return res.status(404).json({ message: 'Pesquisa não encontrada.' });
+    }
+
+    res.status(200).json({ message: 'Status de favorito atualizado.' });
+  } catch (error: any) {
+    logger.error(`Erro ao favoritar pesquisa: ${error.message}`);
+    res.status(500).json({ message: 'Erro ao atualizar favorito.' });
+  }
+};
