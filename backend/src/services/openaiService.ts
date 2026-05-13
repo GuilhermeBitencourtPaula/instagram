@@ -1,11 +1,17 @@
 import OpenAI from 'openai';
 
-// Inicializa a OpenAI com a chave salva nas variáveis de ambiente (.env)
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Função para inicializar a OpenAI de forma segura apenas quando necessário
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey === "sk-..." || apiKey.length < 10) {
+    throw new Error("Configuração da OpenAI ausente ou inválida. Por favor, adicione a OPENAI_API_KEY no painel do Railway.");
+  }
+  return new OpenAI({ apiKey });
+}
 
 export async function gerarInsightsInstagram(hashtag: string, posts: any[]) {
+  const openai = getOpenAIClient();
+  
   // Limpa e resume os dados dos posts para não estourar o limite de tokens da API
   const dadosParaIA = posts.map(post => ({
     legenda: post.caption || "Sem legenda",
