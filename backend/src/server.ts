@@ -25,21 +25,29 @@ process.on('unhandledRejection', (reason) => {
   console.error('💥 FATAL ERROR (Unhandled Rejection):', reason);
 });
 
-// 1. CORS deve ser a PRIMEIRA coisa
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://viryon.vercel.app",
-      "https://vyrion.vercel.app"
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-    optionsSuccessStatus: 200 // Algumas versões do navegador precisam disso
-  })
-);
+// Configuração estrita de CORS para segurança do seu SaaS
+const allowedOrigins = [
+  'https://viryon.vercel.app',
+  'https://vyrion.vercel.app', // Adicionando variação por segurança
+  'http://localhost:3000',
+  'http://localhost:3001'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite requisições sem origem (como ferramentas de teste)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado pela política de CORS do Servidor Viryon'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Permite o envio de tokens JWT entre domínios
+}));
 
 // 2. Outros Middlewares
 app.use(express.json({ limit: '10mb' }));
