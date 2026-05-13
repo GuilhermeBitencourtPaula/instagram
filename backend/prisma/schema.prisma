@@ -243,6 +243,18 @@ model InstagramConfig {
   @@map("instagram_configs")
 }
 
+model InstagramInsight {
+  id          String   @id @default(uuid())
+  hashtag     String
+  sentiment   String   // Ex: Positivo, Neutro, Negativo
+  trends      String   @db.Text // Principais tópicos abordados
+  suggestions String   @db.Text // O que o usuário deve postar
+  rawAnalysis String   @db.Text // Texto completo da IA
+  createdAt   DateTime @default(now())
+
+  @@map("instagram_insights")
+}
+
 enum SearchStatus {
   PENDING
   PROCESSING
