@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "Instagram Agent | Inteligência com IA",
+  title: "Viryon | Inteligência com IA",
   description: "A plataforma premium de pesquisa e análise de tendências do Instagram movida a IA.",
 };
 

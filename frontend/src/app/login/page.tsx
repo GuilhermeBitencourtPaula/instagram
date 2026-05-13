@@ -77,7 +77,7 @@ export default function LoginPage() {
                     <Camera className="text-white w-12 h-12" />
                     </motion.div>
                     <h1 className="text-4xl font-bold tracking-tight text-white mb-2">
-                        Instagram <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Agent</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Viryon</span>
                     </h1>
                     <p className="text-muted-foreground/80 text-center text-sm font-medium">
                     Plataforma de pesquisa inteligente com IA para Instagram
@@ -203,7 +203,7 @@ export default function LoginPage() {
         {/* Footer */}
         <footer className="mt-12 flex flex-col items-center gap-4">
             <div className="flex items-center gap-6">
-                <p className="text-xs text-muted-foreground/50 uppercase tracking-[0.2em]">© 2024 Instagram Insights AI</p>
+                <p className="text-xs text-muted-foreground/50 uppercase tracking-[0.2em]">© 2024 Viryon AI</p>
                 <span className="px-2 py-0.5 bg-white/5 border border-white/5 rounded-md text-[10px] font-bold text-primary">v1.0.0</span>
             </div>
         </footer>

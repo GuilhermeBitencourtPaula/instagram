@@ -41,7 +41,7 @@ export default function Sidebar() {
         <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
           <Camera className="text-white w-6 h-6" />
         </div>
-        <span className="font-bold text-xl tracking-tight text-white">InstaAgent</span>
+        <span className="font-bold text-xl tracking-tight text-white">Viryon</span>
       </div>
 
       <nav className="flex-1 space-y-1">
