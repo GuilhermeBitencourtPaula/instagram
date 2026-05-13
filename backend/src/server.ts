@@ -16,6 +16,15 @@ dotenv.config();
 const app = express();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Captura erros fatais para evitar crashes silenciosos
+process.on('uncaughtException', (err) => {
+  console.error('💥 FATAL ERROR (Uncaught Exception):', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('💥 FATAL ERROR (Unhandled Rejection):', reason);
+});
+
 // 1. CORS deve ser a PRIMEIRA coisa
 app.use(
   cors({
