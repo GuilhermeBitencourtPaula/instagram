@@ -31,34 +31,38 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 // ── Security Middleware ───────────────────────────────────────
 app.use(helmet());
 
-// CORS — allow frontend URL from env, fallback to localhost for dev
+// ── Robust CORS Configuration ────────────────────────────────
+const rawFrontendUrl = process.env.FRONTEND_URL || '';
+const cleanFrontendUrl = rawFrontendUrl.trim().replace(/\/$/, '');
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  cleanFrontendUrl,
+  'https://viryon.vercel.app',
+  'https://vyrion.vercel.app',
   'http://localhost:3001',
   'http://localhost:3000',
 ].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     
-    // Normalize both by removing trailing slash for comparison
-    const normalizedOrigin = origin.replace(/\/$/, '');
+    const normalizedOrigin = origin.trim().replace(/\/$/, '');
     const isAllowed = allowedOrigins.some(o => {
-      if (!o) return false;
-      const normalizedAllowed = o.replace(/\/$/, '');
-      return normalizedOrigin === normalizedAllowed || normalizedOrigin.startsWith(normalizedAllowed);
+      const normalizedAllowed = o.trim().replace(/\/$/, '');
+      return normalizedOrigin === normalizedAllowed;
     });
 
     if (isAllowed) {
       return callback(null, true);
     }
     
-    logger.error(`CORS Blocked: '${origin}' not in [${allowedOrigins.join(', ')}]`);
+    console.error(`[CORS] Bloqueado: '${origin}'. Permitidos: [${allowedOrigins.join(', ')}]`);
     callback(new Error(`CORS: origin '${origin}' not allowed`));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json({ limit: '10mb' }));
