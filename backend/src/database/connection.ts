@@ -29,11 +29,11 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 export async function connectWithRetry(retries = 5, delayMs = 2000): Promise<void> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      console.log(`[MySQL] Tentando conectar ao banco 'instagram' (Tentativa ${attempt}/${retries})...`);
+      console.log(`[MySQL] Tentando conectar ao banco de dados (Tentativa ${attempt}/${retries})...`);
       await prisma.$connect();
       // Execute health check to verify communication pipeline
       await checkDatabaseHealth();
-      console.log(`[MySQL] Conexão com o banco 'instagram' estabelecida com sucesso!`);
+      console.log(`[MySQL] Conexão com o banco de dados estabelecida com sucesso!`);
       return;
     } catch (error: any) {
       console.error(`[MySQL] Falha na conexão (Tentativa ${attempt}/${retries}):`, error.message || error);

@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("admin@instagramagent.com");
@@ -178,7 +179,7 @@ export default function LoginPage() {
 
                 <div className="mt-10 text-center">
                     <p className="text-sm text-muted-foreground">
-                        Não tem uma conta? <button className="text-white font-bold hover:text-primary transition-colors ml-1">Falar com o Admin</button>
+                        Não tem uma conta? <Link href="/register" className="text-white font-bold hover:text-primary transition-colors ml-1">Registre-se agora</Link>
                     </p>
                 </div>
             </div>

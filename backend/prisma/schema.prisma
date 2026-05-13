@@ -1,6 +1,3 @@
-// Prisma schema for Instagram IA Agent
-// Target MySQL Database: `instagram`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +5,242 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int               @id @default(autoincrement())
+  email             String            @unique
+  passwordHash      String
+  name              String?
+  role              String            @default("USER")
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+  favorites         Favorite[]
+  instagramConfig   InstagramConfig?
+  notifications     Notification[]
+  scheduledSearches ScheduledSearch[]
+  searches          Search[]
+
+  @@map("users")
+}
+
+model Search {
+  id         Int          @id @default(autoincrement())
+  userId     Int
+  query      String
+  status     SearchStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  isFavorite Boolean      @default(false)
+  insights   AiInsight[]
+  analytics  Analytics[]
+  posts      Post[]
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags       Tag[]        @relation("searchtags")
+
+  @@index([userId])
+  @@map("searches")
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  searches  Search[] @relation("searchtags")
+
+  @@map("tags")
+}
+
+model InstagramProfile {
+  id             Int        @id @default(autoincrement())
+  username       String     @unique
+  fullName       String?
+  bio            String?    @db.Text
+  profilePicUrl  String?    @db.Text
+  followersCount Int        @default(0)
+  followingCount Int        @default(0)
+  postsCount     Int        @default(0)
+  externalUrl    String?    @db.Text
+  isVerified     Boolean    @default(false)
+  lastScrapedAt  DateTime   @default(now())
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  favorites      Favorite[]
+  posts          Post[]
+  reels          Reel[]
+
+  @@index([username])
+  @@map("instagram_profiles")
+}
+
+model Post {
+  id              Int              @id @default(autoincrement())
+  searchId        Int
+  profileId       Int
+  instagramPostId String           @unique
+  caption         String?          @db.Text
+  mediaUrl        String?          @db.Text
+  mediaType       String           @default("IMAGE")
+  likesCount      Int              @default(0)
+  commentsCount   Int              @default(0)
+  estimatedEngage Float            @default(0)
+  locationName    String?
+  postedAt        DateTime
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  comments        Comment[]
+  profile         InstagramProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  search          Search           @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  hashtags        Hashtag[]        @relation("posthashtags")
+
+  @@index([searchId])
+  @@index([profileId])
+  @@map("instagram_posts")
+}
+
+model Reel {
+  id              Int              @id @default(autoincrement())
+  profileId       Int
+  instagramReelId String           @unique
+  caption         String?          @db.Text
+  videoUrl        String?          @db.Text
+  viewCount       Int              @default(0)
+  playCount       Int              @default(0)
+  likesCount      Int              @default(0)
+  commentsCount   Int              @default(0)
+  duration        Float?
+  postedAt        DateTime
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  profile         InstagramProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("reels")
+}
+
+model Comment {
+  id                 Int      @id @default(autoincrement())
+  postId             Int
+  instagramCommentId String   @unique
+  username           String
+  text               String   @db.Text
+  sentimentScore     Float?
+  sentimentLabel     String?
+  likesCount         Int      @default(0)
+  postedAt           DateTime
+  createdAt          DateTime @default(now())
+  post               Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("comments")
+}
+
+model Hashtag {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  createdAt       DateTime @default(now())
+  instagram_posts Post[]   @relation("posthashtags")
+
+  @@map("hashtags")
+}
+
+model AiInsight {
+  id             Int      @id @default(autoincrement())
+  searchId       Int
+  summary        String   @db.Text
+  detectedTrends String?  @db.Text
+  suggestedNiche String?
+  viralPatterns  String?  @db.Text
+  createdAt      DateTime @default(now())
+  search         Search   @relation(fields: [searchId], references: [id], onDelete: Cascade)
+
+  @@index([searchId])
+  @@map("ai_insights")
+}
+
+model Analytics {
+  id               Int      @id @default(autoincrement())
+  searchId         Int
+  totalPosts       Int      @default(0)
+  totalLikes       Int      @default(0)
+  totalComments    Int      @default(0)
+  avgEngagement    Float    @default(0)
+  topLocationsJson String?  @db.Text
+  calculatedAt     DateTime @default(now())
+  search           Search   @relation(fields: [searchId], references: [id], onDelete: Cascade)
+
+  @@index([searchId])
+  @@map("analytics")
+}
+
+model Favorite {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  profileId Int
+  notes     String?          @db.Text
+  createdAt DateTime         @default(now())
+  profile   InstagramProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, profileId])
+  @@index([profileId], map: "favorites_profileId_fkey")
+  @@map("favorites")
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  level     LogLevel @default(INFO)
+  context   String?
+  message   String   @db.Text
+  metaJson  String?  @db.Text
+  timestamp DateTime @default(now())
+
+  @@map("logs")
+}
+
+model Notification {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  title     String
+  message   String             @db.Text
+  status    NotificationStatus @default(UNREAD)
+  createdAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model ScheduledSearch {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  query          String
+  cronExpression String
+  isActive       Boolean   @default(true)
+  lastRunAt      DateTime?
+  nextRunAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("scheduled_searches")
+}
+
+model InstagramConfig {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  instagramUserId String
+  accessToken     String   @db.Text
+  tokenExpiresAt  DateTime
+  isConnected     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("instagram_configs")
 }
 
 enum SearchStatus {
@@ -27,268 +260,4 @@ enum LogLevel {
   WARN
   ERROR
   DEBUG
-}
-
-// 1. users
-model User {
-  id                Int               @id @default(autoincrement())
-  email             String            @unique
-  passwordHash      String
-  name              String?
-  role              String            @default("USER")
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  deletedAt         DateTime?         // Soft delete
-
-  searches          Search[]
-  favorites         Favorite[]
-  notifications     Notification[]
-  scheduledSearches ScheduledSearch[]
-  instagramConfig   InstagramConfig?
-
-  @@map("users")
-}
-
-// 2. searches
-model Search {
-  id        Int          @id @default(autoincrement())
-  userId    Int
-  query     String
-  status    SearchStatus @default(PENDING)
-  isFavorite Boolean      @default(false)
-  createdAt  DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  deletedAt DateTime?
-
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags      Tag[]        @relation("SearchTags")
-  posts     Post[]
-  insights  AiInsight[]
-  analytics Analytics[]
-
-  @@index([userId])
-  @@map("searches")
-}
-
-// 3. tags
-model Tag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-
-  searches  Search[] @relation("SearchTags")
-
-  @@map("tags")
-}
-
-// 4. instagram_profiles
-model InstagramProfile {
-  id             Int      @id @default(autoincrement())
-  username       String   @unique
-  fullName       String?
-  bio            String?  @db.Text
-  profilePicUrl  String?  @db.Text
-  followersCount Int      @default(0)
-  followingCount Int      @default(0)
-  postsCount     Int      @default(0)
-  externalUrl    String?  @db.Text
-  isVerified     Boolean  @default(false)
-  lastScrapedAt  DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  posts          Post[]
-  reels          Reel[]
-  favorites      Favorite[]
-
-  @@index([username])
-  @@map("instagram_profiles")
-}
-
-// 5. instagram_posts
-model Post {
-  id               Int              @id @default(autoincrement())
-  searchId         Int
-  profileId        Int
-  instagramPostId  String           @unique // Meta standard ID
-  caption          String?          @db.Text
-  mediaUrl         String?          @db.Text
-  mediaType        String           @default("IMAGE") // IMAGE, CAROUSEL, VIDEO
-  likesCount       Int              @default(0)
-  commentsCount    Int              @default(0)
-  estimatedEngage  Float            @default(0.0)
-  locationName     String?
-  postedAt         DateTime
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-
-  search           Search           @relation(fields: [searchId], references: [id], onDelete: Cascade)
-  profile          InstagramProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  comments         Comment[]
-  hashtags         Hashtag[]        @relation("PostHashtags")
-
-  @@index([searchId])
-  @@index([profileId])
-  @@map("instagram_posts")
-}
-
-// 6. reels
-model Reel {
-  id               Int              @id @default(autoincrement())
-  profileId        Int
-  instagramReelId  String           @unique
-  caption          String?          @db.Text
-  videoUrl         String?          @db.Text
-  viewCount        Int              @default(0)
-  playCount        Int              @default(0)
-  likesCount       Int              @default(0)
-  commentsCount    Int              @default(0)
-  duration         Float?
-  postedAt         DateTime
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-
-  profile          InstagramProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  @@index([profileId])
-  @@map("reels")
-}
-
-// 7. comments
-model Comment {
-  id                  Int      @id @default(autoincrement())
-  postId              Int
-  instagramCommentId  String   @unique
-  username            String
-  text                String   @db.Text
-  sentimentScore      Float?   // Generated by AI (-1.0 to 1.0)
-  sentimentLabel      String?  // POSITIVE, NEUTRAL, NEGATIVE
-  likesCount          Int      @default(0)
-  postedAt            DateTime
-  createdAt           DateTime @default(now())
-
-  post                Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  @@index([postId])
-  @@map("comments")
-}
-
-// 8. hashtags
-model Hashtag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-
-  posts     Post[]   @relation("PostHashtags")
-
-  @@map("hashtags")
-}
-
-// 9. ai_insights
-model AiInsight {
-  id             Int      @id @default(autoincrement())
-  searchId       Int
-  summary        String   @db.Text
-  detectedTrends String?  @db.Text
-  suggestedNiche String?
-  viralPatterns  String?  @db.Text
-  createdAt      DateTime @default(now())
-
-  search         Search   @relation(fields: [searchId], references: [id], onDelete: Cascade)
-
-  @@index([searchId])
-  @@map("ai_insights")
-}
-
-// 10. analytics
-model Analytics {
-  id               Int      @id @default(autoincrement())
-  searchId         Int
-  totalPosts       Int      @default(0)
-  totalLikes       Int      @default(0)
-  totalComments    Int      @default(0)
-  avgEngagement    Float    @default(0.0)
-  topLocationsJson String?  @db.Text
-  calculatedAt     DateTime @default(now())
-
-  search           Search   @relation(fields: [searchId], references: [id], onDelete: Cascade)
-
-  @@index([searchId])
-  @@map("analytics")
-}
-
-// 11. favorites
-model Favorite {
-  id        Int              @id @default(autoincrement())
-  userId    Int
-  profileId Int
-  notes     String?          @db.Text
-  createdAt DateTime         @default(now())
-
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  profile   InstagramProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, profileId])
-  @@map("favorites")
-}
-
-// 12. logs
-model Log {
-  id        Int      @id @default(autoincrement())
-  level     LogLevel @default(INFO)
-  context   String?
-  message   String   @db.Text
-  metaJson  String?  @db.Text
-  timestamp DateTime @default(now())
-
-  @@map("logs")
-}
-
-// 13. notifications
-model Notification {
-  id        Int                @id @default(autoincrement())
-  userId    Int
-  title     String
-  message   String             @db.Text
-  status    NotificationStatus @default(UNREAD)
-  createdAt DateTime           @default(now())
-
-  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("notifications")
-}
-
-// 14. scheduled_searches
-model ScheduledSearch {
-  id             Int       @id @default(autoincrement())
-  userId         Int
-  query          String
-  cronExpression String    // e.g., "0 0 * * *"
-  isActive       Boolean   @default(true)
-  lastRunAt      DateTime?
-  nextRunAt      DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("scheduled_searches")
-}
-
-// 15. instagram_configs
-model InstagramConfig {
-  id                Int      @id @default(autoincrement())
-  userId            Int      @unique
-  instagramUserId   String   // The ID of the Instagram Business Account
-  accessToken       String   @db.Text
-  tokenExpiresAt    DateTime
-  isConnected       Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("instagram_configs")
 }

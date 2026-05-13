@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   LayoutDashboard, 
@@ -32,8 +32,14 @@ const secondaryItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
 
   return (
     <aside className="w-72 h-screen flex flex-col bg-card/30 backdrop-blur-xl border-r border-white/5 p-6 sticky top-0">
@@ -95,7 +101,7 @@ export default function Sidebar() {
         ))}
 
         <button
-          onClick={() => logout()}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all mt-2"
         >
           <LogOut className="w-5 h-5" />
