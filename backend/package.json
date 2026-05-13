@@ -7,13 +7,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "ts-node-dev src/server.ts",
     "build": "tsc",
-    "start": "npx prisma db push --accept-data-loss && node dist/server.js",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push --accept-data-loss",
-    "db:migrate": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "start": "node dist/server.js",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
