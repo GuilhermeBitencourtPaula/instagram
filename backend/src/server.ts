@@ -62,14 +62,15 @@ app.use('/api/profiles', profileRoutes);
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
-  // Inicia o servidor imediatamente para evitar 502 do Railway
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  const portNum = Number(PORT);
+  
+  // Inicia o servidor em 0.0.0.0 (padrão para Railway/Cloud)
+  app.listen(portNum, '0.0.0.0', () => {
+    console.log(`🚀 Server is LIVE on port ${portNum} (0.0.0.0)`);
     initScheduler();
   });
 
   try {
-    // Conecta ao banco em background
     await connectWithRetry();
     console.log("✅ Database connected");
   } catch (error: any) {
