@@ -16,41 +16,25 @@ dotenv.config();
 const app = express();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Captura erros fatais
-process.on('uncaughtException', (err) => {
-  console.error('💥 FATAL ERROR (Uncaught Exception):', err);
-});
-
-process.on('unhandledRejection', (reason) => {
-  console.error('💥 FATAL ERROR (Unhandled Rejection):', reason);
-});
-
-// Middleware Base
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-// Configuração de CORS definitiva
+// 1. CORS deve ser a PRIMEIRA coisa
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://viryon.vercel.app",
-        "https://vyrion.vercel.app"
-      ];
-      // Permite origins que terminam em .vercel.app (para previews) ou os fixos
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://viryon.vercel.app",
+      "https://vyrion.vercel.app"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+    optionsSuccessStatus: 200 // Algumas versões do navegador precisam disso
   })
 );
+
+// 2. Outros Middlewares
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use(helmet());
 const stream = { write: (msg: string) => logger.http(msg.trim()) };
