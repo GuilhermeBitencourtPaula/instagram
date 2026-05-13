@@ -5,7 +5,9 @@ import * as instagramService from '../services/instagram.service';
 
 export const getAuthUrl = async (req: Request, res: Response) => {
   const appId = process.env.INSTAGRAM_APP_ID;
-  const redirectUri = `${process.env.BACKEND_URL}/api/instagram/callback`;
+  const baseUrl = process.env.BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+  const redirectUri = encodeURIComponent(`${baseUrl}/api/instagram/callback`);
+  
   const scopes = [
     'instagram_basic',
     'instagram_manage_insights',
@@ -31,7 +33,8 @@ export const handleCallback = async (req: Request, res: Response) => {
   }
 
   try {
-    const redirectUri = `${process.env.BACKEND_URL}/api/instagram/callback`;
+    const baseUrl = process.env.BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+    const redirectUri = `${baseUrl}/api/instagram/callback`;
     
     // 1. Exchange code for short-lived token
     const shortToken = await instagramService.exchangeCodeForToken(code, redirectUri);
