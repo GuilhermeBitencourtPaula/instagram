@@ -11,6 +11,15 @@ import { initScheduler } from './services/scheduler.service';
 
 dotenv.config();
 
+// Captura erros fatais para o log do Railway
+process.on('uncaughtException', (err) => {
+  console.error('💥 FATAL ERROR (Uncaught Exception):', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 FATAL ERROR (Unhandled Rejection):', reason);
+});
+
 const app = express();
 
 app.use(express.json({ limit: '10mb' }));
