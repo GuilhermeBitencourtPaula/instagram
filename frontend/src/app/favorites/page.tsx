@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Bookmark, Search, Trash2, ExternalLink } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -76,21 +74,18 @@ export default function FavoritesPage() {
             {filteredFavorites.map((fav: any) => (
               <Card key={fav.id} className="bg-slate-900/40 border-slate-800 hover:border-orange-500/30 transition-all duration-300 group overflow-hidden">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                  <Avatar className="h-12 w-12 border-2 border-orange-500/20">
-                    <AvatarImage src={fav.profile.profilePicUrl} />
-                    <AvatarFallback className="bg-slate-800 text-slate-400">
-                      {fav.profile.username[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="h-12 w-12 rounded-full bg-orange-500/10 flex items-center justify-center border border-orange-500/20 text-orange-500 font-bold">
+                    {fav.profile.username[0].toUpperCase()}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-sm font-semibold text-white truncate">
                       @{fav.profile.username}
                     </CardTitle>
                     <p className="text-xs text-slate-500 truncate">{fav.profile.fullName || 'Instagram Profile'}</p>
                   </div>
-                  <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
+                  <div className="px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20 text-[10px]">
                     {fav.profile.followersCount.toLocaleString()} seg
-                  </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="mt-2 text-xs text-slate-400 line-clamp-2 italic h-8">

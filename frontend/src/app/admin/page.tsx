@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Shield, Users, Activity, Settings, Database, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import api from "@/lib/api";
 
@@ -106,9 +105,9 @@ export default function AdminPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-slate-400">{log.time}</p>
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 text-[10px] h-4">
+                      <div className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 text-[10px]">
                         {log.status}
-                      </Badge>
+                      </div>
                     </div>
                   </div>
                 ))}
