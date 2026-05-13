@@ -22,7 +22,8 @@ export const cacheMiddleware = (duration: number) => {
 
       if (cachedResponse) {
         logger.debug(`Cache hit for ${key}`);
-        return res.status(200).json(JSON.parse(cachedResponse));
+        const data = typeof cachedResponse === 'string' ? cachedResponse : cachedResponse.toString();
+        return res.status(200).json(JSON.parse(data));
       }
 
       // If not cached, override res.json to store the response
