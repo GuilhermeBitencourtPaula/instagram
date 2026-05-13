@@ -5,7 +5,8 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import logger from './utils/logger';
-import { connectWithRetry, checkDatabaseHealth } from './database/connection';
+import bcrypt from 'bcryptjs';
+import prisma, { connectWithRetry, checkDatabaseHealth } from './database/connection';
 import authRoutes from './routes/auth.routes';
 import searchRoutes from './routes/search.routes';
 import instagramRoutes from './routes/instagram.routes';
@@ -105,6 +106,57 @@ async function startServer() {
   try {
     logger.info(`🚀 Starting Instagram AI Agent (${NODE_ENV})...`);
     await connectWithRetry();
+
+    // ── Self-Healing Automatic Seeding ───────────────────────────
+    try {
+      const userCount = await prisma.user.count();
+      if (userCount === 0) {
+        logger.info('🌱 Banco de dados vazio detectado. Iniciando seed automático...');
+        
+        // 1. Inserir Tags Padrão
+        const defaultTags = [
+          'nicho', 'cidade', 'produto', 'influencer', 'concorrente',
+          'moda', 'fitness', 'tecnologia', 'viral', 'marketing'
+        ];
+        for (const tagName of defaultTags) {
+          await prisma.tag.upsert({
+            where: { name: tagName },
+            update: {},
+            create: { name: tagName }
+          });
+        }
+
+        // 2. Criar Admin Padrão
+        const adminEmail = 'admin@instagramagent.com';
+        const plainPassword = 'AdminSecurePassword123!';
+        const passwordHash = await bcrypt.hash(plainPassword, 12);
+
+        const adminUser = await prisma.user.upsert({
+          where: { email: adminEmail },
+          update: {},
+          create: {
+            email: adminEmail,
+            name: 'Agente IA Admin',
+            passwordHash,
+            role: 'ADMIN'
+          }
+        });
+
+        // 3. Registrar Log Inicial
+        await prisma.log.create({
+          data: {
+            level: 'INFO',
+            context: 'DATABASE_SEED',
+            message: 'Banco populado com sucesso no startup automático.',
+            metaJson: JSON.stringify({ adminUserId: adminUser.id })
+          }
+        });
+
+        logger.info(`✅ Seed automático concluído! Admin: ${adminEmail}`);
+      }
+    } catch (seedErr: any) {
+      logger.error(`❌ Erro no seed automático: ${seedErr.message}`);
+    }
 
     // Redis is optional — don't crash if unavailable
     try {
