@@ -30,8 +30,8 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:3001",
-      "https://vyrion.vercel.app",
-      "https://viryon.vercel.app" // Seguro extra para o domínio atual
+      "https://viryon.vercel.app",
+      "https://vyrion.vercel.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
