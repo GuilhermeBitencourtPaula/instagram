@@ -32,15 +32,23 @@ app.use(express.urlencoded({ extended: true }));
 // Configuração de CORS definitiva
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://viryon.vercel.app",
-      "https://vyrion.vercel.app"
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://viryon.vercel.app",
+        "https://vyrion.vercel.app"
+      ];
+      // Permite origins que terminam em .vercel.app (para previews) ou os fixos
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
   })
 );
 
