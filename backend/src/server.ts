@@ -42,9 +42,20 @@ app.use(cors({
   origin: (origin, callback) => {
     // allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(o => origin.startsWith(o))) {
+    
+    // Normalize both by removing trailing slash for comparison
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    const isAllowed = allowedOrigins.some(o => {
+      if (!o) return false;
+      const normalizedAllowed = o.replace(/\/$/, '');
+      return normalizedOrigin === normalizedAllowed || normalizedOrigin.startsWith(normalizedAllowed);
+    });
+
+    if (isAllowed) {
       return callback(null, true);
     }
+    
+    logger.error(`CORS Blocked: '${origin}' not in [${allowedOrigins.join(', ')}]`);
     callback(new Error(`CORS: origin '${origin}' not allowed`));
   },
   credentials: true,
