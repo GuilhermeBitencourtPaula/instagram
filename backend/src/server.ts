@@ -16,31 +16,36 @@ dotenv.config();
 const app = express();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// 1. CORS NO TOPO ABSOLUTO - DEVE SER A PRIMEIRA COISA
+// 1. Defina estritamente quais origens têm permissão de acesso
+const allowedOrigins = [
+  'https://viryon.vercel.app', // Seu app de produção na Vercel
+  'https://vyrion.vercel.app', // Variação de segurança
+  'http://localhost:3000',      // Seu ambiente de testes local (Next.js)
+  'http://localhost:3001'       // Backend local
+];
+
+// 2. Aplique a configuração do CORS antes das rotas
 app.use(cors({
-  origin: true, // Aceita qualquer origem que venha da Vercel/Localhost
-  credentials: true,
+  origin: function (origin, callback) {
+    // Permite requisições sem "origin" (como chamadas diretas de servidores backend ou Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error('Acesso bloqueado pelas políticas de CORS do Viryon'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Essencial se você for trafegar cookies ou tokens JWT entre domínios
 }));
 
-// Responde imediatamente a requisições de preflight (OPTIONS)
-app.options('*', cors());
-
-// Captura erros fatais
-process.on('uncaughtException', (err) => {
-  console.error('💥 FATAL ERROR (Uncaught Exception):', err);
-});
-
-process.on('unhandledRejection', (reason) => {
-  console.error('💥 FATAL ERROR (Unhandled Rejection):', reason);
-});
-
-// 2. Outros Middlewares
+// 3. Middlewares de parseamento padrão
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Helmet desativado temporariamente para debugar CORS
+// Helmet desativado temporariamente para garantir a eficácia do plano de CORS
 // app.use(helmet());
 
 const stream = { write: (msg: string) => logger.http(msg.trim()) };
