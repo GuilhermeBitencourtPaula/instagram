@@ -170,13 +170,15 @@ async function startServer() {
       logger.error(`❌ Erro no seed automático: ${seedErr.message}`);
     }
 
-    // Redis is optional — don't crash if unavailable
+    // Redis is disabled to ensure fast startup on Railway without Redis service
+    /* 
     try {
       const { connectRedis } = await import('./database/redis');
       await connectRedis();
     } catch (redisErr: any) {
       logger.warn(`⚠️  Redis not available: ${redisErr.message}. Continuing without cache.`);
     }
+    */
 
     app.listen(PORT, () => {
       logger.info(`✅ Server listening on port ${PORT}`);
