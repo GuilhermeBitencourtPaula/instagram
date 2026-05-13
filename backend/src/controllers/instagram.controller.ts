@@ -15,7 +15,7 @@ export const getAuthUrl = async (req: Request, res: Response) => {
     'pages_read_engagement'
   ].join(','));
 
-  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=viryon_auth_state`;
+  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=viryon_${Date.now()}`;
 
   res.json({ url: authUrl });
 };
