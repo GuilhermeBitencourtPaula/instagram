@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Shield, Users, Activity, Settings, Database, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import api from "@/lib/api";
@@ -88,7 +88,7 @@ export default function AdminPage() {
           <Card className="lg:col-span-2 bg-slate-900/40 border-slate-800">
             <CardHeader>
               <CardTitle className="text-lg text-white">Logs do Sistema</CardTitle>
-              <CardDescription className="text-slate-500">Atividades recentes registradas no backend.</CardDescription>
+              <p className="text-sm text-slate-500">Atividades recentes registradas no backend.</p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
