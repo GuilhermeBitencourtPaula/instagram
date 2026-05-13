@@ -13,9 +13,9 @@ export const getAuthUrl = async (req: Request, res: Response) => {
     'instagram_manage_insights',
     'pages_show_list',
     'pages_read_engagement'
-  ].join(',');
+  ].join(' ');
 
-  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
+  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=viryon_auth_state`;
 
   res.json({ url: authUrl });
 };
