@@ -15,7 +15,7 @@ export const getAuthUrl = async (req: Request, res: Response) => {
     'pages_read_engagement'
   ].join(',');
 
-  const authUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
+  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
 
   res.json({ url: authUrl });
 };
