@@ -21,12 +21,14 @@ import { Button } from "@/components/ui/Button";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import ResultCard from "@/components/search/ResultCard";
+import AiInsightsCard from "@/components/analytics/AiInsightsCard";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [aiInsight, setAiInsight] = useState<any>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +36,7 @@ export default function SearchPage() {
 
     setIsSearching(true);
     try {
+      // 1. Criar e processar a pesquisa padrão
       const createResponse = await api.post("/searches", { 
         query, 
         tagNames: []
@@ -43,7 +46,26 @@ export default function SearchPage() {
       const processResponse = await api.post(`/searches/${searchId}/process`);
       
       setResults(processResponse.data.search);
-      setIsFavorite(false); // New search is not favorite by default
+      setIsFavorite(false);
+
+      // 2. Tentar gerar insights de IA avançados via Instagram API
+      try {
+        const statusRes = await api.get("/instagram/status");
+        if (statusRes.data.isConnected) {
+          const aiRes = await api.post("/instagram/gerar-analise-ia", {
+            accessToken: statusRes.data.config.accessToken,
+            facebookPageId: statusRes.data.config.instagramUserId,
+            hashtag: query.replace(/\s+/g, '') // Remove espaços para a hashtag
+          });
+          
+          if (aiRes.data.success) {
+            setAiInsight(aiRes.data.insight);
+          }
+        }
+      } catch (aiError) {
+        console.warn("IA avançada não disponível ou conta não conectada:", aiError);
+      }
+      
       toast.success("Análise concluída com sucesso!");
     } catch (error: any) {
       console.error(error);
@@ -68,6 +90,7 @@ export default function SearchPage() {
 
   const resetSearch = () => {
     setResults(null);
+    setAiInsight(null);
     setQuery("");
   };
 
@@ -106,46 +129,56 @@ export default function SearchPage() {
           </header>
 
           {/* AI Insights Section */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <div className="lg:col-span-2 bg-gradient-to-br from-primary/20 to-accent/5 via-[#0d0d12] border border-primary/20 rounded-[2.5rem] p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full" />
-                <div className="relative z-10 space-y-6">
-                   <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full w-fit">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-bold text-primary uppercase tracking-wider">Sumário da IA</span>
-                   </div>
-                   <p className="text-lg text-white/90 leading-relaxed font-medium italic">
-                      "{results.insights?.[0]?.summary || 'Gerando resumo...'}"
-                   </p>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                      <div className="space-y-1">
-                         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <TrendingUp className="w-3.5 h-3.5 text-green-400" /> Tendências
-                         </h4>
-                         <p className="text-sm text-white/80">{results.insights?.[0]?.detectedTrends}</p>
-                      </div>
-                      <div className="space-y-1">
-                         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Target className="w-3.5 h-3.5 text-accent" /> Nicho Sugerido
-                         </h4>
-                         <p className="text-sm text-white/80">{results.insights?.[0]?.suggestedNiche}</p>
-                      </div>
-                   </div>
-                </div>
-             </div>
-             
-             <div className="bg-card/40 border border-white/5 rounded-[2.5rem] p-8 flex flex-col justify-center space-y-6">
-                <div className="space-y-2">
-                   <div className="p-3 bg-yellow-500/10 rounded-2xl w-fit text-yellow-500">
-                      <Zap className="w-6 h-6" />
-                   </div>
-                   <h3 className="text-xl font-bold text-white">Padrões Virais</h3>
-                   <p className="text-sm text-muted-foreground leading-relaxed">
-                      {results.insights?.[0]?.viralPatterns}
-                   </p>
-                </div>
-             </div>
-          </section>
+          {aiInsight ? (
+            <AiInsightsCard 
+              hashtag={aiInsight.hashtag}
+              sentiment={aiInsight.sentiment}
+              trends={aiInsight.trends}
+              suggestions={aiInsight.suggestions}
+              createdAt={aiInsight.createdAt}
+            />
+          ) : (
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+               <div className="lg:col-span-2 bg-gradient-to-br from-primary/20 to-accent/5 via-[#0d0d12] border border-primary/20 rounded-[2.5rem] p-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full" />
+                  <div className="relative z-10 space-y-6">
+                     <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full w-fit">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Sumário da IA</span>
+                     </div>
+                     <p className="text-lg text-white/90 leading-relaxed font-medium italic">
+                        "{results.insights?.[0]?.summary || 'Gerando resumo...'}"
+                     </p>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                        <div className="space-y-1">
+                           <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                              <TrendingUp className="w-3.5 h-3.5 text-green-400" /> Tendências
+                           </h4>
+                           <p className="text-sm text-white/80">{results.insights?.[0]?.detectedTrends}</p>
+                        </div>
+                        <div className="space-y-1">
+                           <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                              <Target className="w-3.5 h-3.5 text-accent" /> Nicho Sugerido
+                           </h4>
+                           <p className="text-sm text-white/80">{results.insights?.[0]?.suggestedNiche}</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               
+               <div className="bg-card/40 border border-white/5 rounded-[2.5rem] p-8 flex flex-col justify-center space-y-6">
+                  <div className="space-y-2">
+                     <div className="p-3 bg-yellow-500/10 rounded-2xl w-fit text-yellow-500">
+                        <Zap className="w-6 h-6" />
+                     </div>
+                     <h3 className="text-xl font-bold text-white">Padrões Virais</h3>
+                     <p className="text-sm text-muted-foreground leading-relaxed">
+                        {results.insights?.[0]?.viralPatterns}
+                     </p>
+                  </div>
+               </div>
+            </section>
+          )}
 
           {/* Posts Grid */}
           <section className="space-y-6">
