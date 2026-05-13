@@ -11,12 +11,14 @@ export const cacheMiddleware = (duration: number) => {
 
     const key = `cache:${req.originalUrl || req.url}`;
     
+    const client = redisClient;
+    
     try {
-      if (!redisClient.isOpen) {
+      if (!client || !client.isOpen) {
         return next();
       }
 
-      const cachedResponse = await redisClient.get(key);
+      const cachedResponse = await client.get(key);
 
       if (cachedResponse) {
         logger.debug(`Cache hit for ${key}`);
@@ -26,7 +28,7 @@ export const cacheMiddleware = (duration: number) => {
       // If not cached, override res.json to store the response
       const originalJson = res.json;
       res.json = (body) => {
-        redisClient.setEx(key, duration, JSON.stringify(body));
+        client.setEx(key, duration, JSON.stringify(body));
         return originalJson.call(res, body);
       };
 
