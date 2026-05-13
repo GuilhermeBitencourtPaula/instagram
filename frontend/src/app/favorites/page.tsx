@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import Link from "next/link";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
@@ -101,17 +102,13 @@ export default function FavoritesPage() {
                       <Trash2 className="h-4 w-4 mr-2" />
                       Remover
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-slate-800 text-slate-300 hover:bg-slate-800"
-                      asChild
+                    <Link 
+                      href={`/profiles/${fav.profile.username}`}
+                      className="inline-flex items-center justify-center h-9 px-4 rounded-xl border border-white/10 bg-transparent hover:bg-white/5 text-xs font-bold text-slate-300 transition-all"
                     >
-                      <a href={`/profiles/${fav.profile.username}`}>
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Ver Perfil
-                      </a>
-                    </Button>
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Ver Perfil
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
