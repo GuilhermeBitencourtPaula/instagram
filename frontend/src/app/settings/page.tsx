@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { 
-  Instagram, 
   CheckCircle2, 
   AlertCircle, 
   Link as LinkIcon, 
@@ -12,6 +11,7 @@ import {
   ShieldCheck,
   Settings as SettingsIcon
 } from "lucide-react";
+import { InstagramIcon } from "@/components/ui/InstagramIcon";
 import { Button } from "@/components/ui/Button";
 import { getInstagramAuthUrl, getInstagramStatus, disconnectInstagram } from "@/lib/instagram";
 import { motion } from "framer-motion";
@@ -78,13 +78,13 @@ export default function SettingsPage() {
           {/* Instagram Connection Section */}
           <section className="bg-card/30 backdrop-blur-xl border border-white/5 rounded-3xl p-8 overflow-hidden relative shadow-2xl">
             <div className="absolute top-0 right-0 p-8 opacity-5">
-              <Instagram size={160} />
+              <InstagramIcon size={160} />
             </div>
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-14 h-14 bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/20">
-                  <Instagram className="text-white w-8 h-8" />
+                  <InstagramIcon className="text-white w-8 h-8" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">Integração com Instagram</h2>
@@ -160,7 +160,7 @@ export default function SettingsPage() {
                         onClick={handleConnect}
                         disabled={actionLoading}
                       >
-                        <Instagram className="w-6 h-6 mr-3" />
+                        <InstagramIcon className="w-6 h-6 mr-3" />
                         {actionLoading ? "Redirecionando..." : "Conectar Instagram Business"}
                       </Button>
                       
