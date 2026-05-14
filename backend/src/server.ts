@@ -59,6 +59,8 @@ app.use('/api/searches', searchRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/monitoring', monitoringRoutes);
+logger.info('Rotas de monitoramento registradas');
+
 
 
 const PORT = process.env.PORT || 3000;
