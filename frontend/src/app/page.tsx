@@ -12,10 +12,8 @@ export default function LandingPage() {
       {/* Navbar Minimalista */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="Viryon Logo" className="h-10 w-10 rounded-xl shadow-lg shadow-orange-500/20" />
             <span className="text-2xl font-black tracking-tighter">VIR<span className="text-orange-500">YON</span></span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
