@@ -19,7 +19,21 @@ import api from "@/lib/api";
 import Link from "next/link";
 import { toast } from "sonner";
 
-// ... (stats interface and DashboardStats/RecentSearch remains same)
+interface DashboardStats {
+  totalSearches: number;
+  totalPosts: number;
+  totalInsights: number;
+  avgEngagement: string;
+}
+
+interface RecentSearch {
+  id: number;
+  query: string;
+  createdAt: string;
+  status: string;
+  isFavorite: boolean;
+  _count: { posts: number };
+}
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
