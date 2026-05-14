@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Shield, Zap, Target, TrendingUp, CheckCircle2, Star, ArrowRight, Instagram, BarChart3, Search } from "lucide-react";
+import { Shield, Zap, Target, TrendingUp, CheckCircle2, Star, ArrowRight, BarChart3, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { InstagramIcon } from "@/components/ui/InstagramIcon";
 
