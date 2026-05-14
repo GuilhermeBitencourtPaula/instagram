@@ -15,10 +15,11 @@ import {
   TrendingUp,
   Target,
   Star,
-  Instagram,
   Lock,
   AlertCircle
 } from "lucide-react";
+import { InstagramIcon as Instagram } from "@/components/ui/InstagramIcon";
+
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/Button";
 import api from "@/lib/api";

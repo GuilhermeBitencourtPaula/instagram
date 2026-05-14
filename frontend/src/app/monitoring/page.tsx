@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Activity, Bell, Clock, Plus, Loader2, X, Trash2, CheckCircle2, AlertCircle, Instagram } from "lucide-react";
+import { Activity, Bell, Clock, Plus, Loader2, X, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { InstagramIcon as Instagram } from "@/components/ui/InstagramIcon";
+
 
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
