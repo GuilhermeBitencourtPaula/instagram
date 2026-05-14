@@ -11,6 +11,8 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import Link from "next/link";
+
 
 interface Alert {
   id: number;
