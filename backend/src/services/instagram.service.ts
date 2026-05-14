@@ -61,22 +61,30 @@ export const getInstagramBusinessId = async (accessToken: string): Promise<strin
     });
 
     const pages = pagesResponse.data.data;
-    if (!pages || pages.length === 0) return null;
+    console.log(`Páginas encontradas: ${pages?.length || 0}`);
+
+    if (!pages || pages.length === 0) {
+      console.warn('Nenhuma página do Facebook encontrada para este usuário.');
+      return null;
+    }
 
     // 2. For each page, check if there's a connected Instagram Business Account
     for (const page of pages) {
+      console.log(`Verificando página: ${page.name} (${page.id})`);
       const igResponse = await axios.get(`${FACEBOOK_GRAPH_URL}/${page.id}`, {
         params: {
-          fields: 'instagram_business_account',
+          fields: 'instagram_business_account,name',
           access_token: accessToken,
         },
       });
 
       if (igResponse.data.instagram_business_account) {
+        console.log(`Instagram Business encontrado na página ${page.name}:`, igResponse.data.instagram_business_account.id);
         return igResponse.data.instagram_business_account.id;
       }
     }
 
+    console.warn('Nenhuma das páginas encontradas possui um Instagram Business vinculado.');
     return null;
   } catch (error: any) {
     logger.error(`Error fetching Instagram Business ID: ${error.response?.data?.error?.message || error.message}`);
