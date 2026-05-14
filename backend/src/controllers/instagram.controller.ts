@@ -13,7 +13,9 @@ export const getAuthUrl = async (req: Request, res: Response) => {
 
   const scopes = encodeURIComponent([
     'instagram_basic',
-    'instagram_manage_insights'
+    'instagram_manage_insights',
+    'pages_show_list',
+    'pages_read_engagement'
   ].join(','));
 
   // State robusto com userId
