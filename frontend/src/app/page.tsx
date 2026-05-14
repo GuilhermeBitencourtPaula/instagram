@@ -84,8 +84,8 @@ export default function LandingPage() {
             <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-purple-600/20 rounded-[2rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
             <div className="relative bg-[#0a0a0a] border border-white/5 rounded-[1.5rem] p-2 backdrop-blur-sm overflow-hidden">
                <img 
-                 src="/dashboard-pro.png" 
-                 alt="Viryon Professional Dashboard" 
+                 src="/dashboard-final.png" 
+                 alt="Viryon Instagram Intelligence Dashboard" 
                  className="rounded-xl opacity-90 group-hover:opacity-100 transition-all duration-700 w-full"
                />
                {/* Overlay de Vidro Simulado */}
