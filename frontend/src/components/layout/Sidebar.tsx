@@ -119,17 +119,17 @@ export default function Sidebar() {
       </aside>
 
       {/* Bottom Bar Mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 px-2 py-3 flex items-center justify-around">
-        {menuItems.slice(0, 5).map((item) => {
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 px-1 py-3 flex items-center justify-around">
+        {menuItems.slice(0, 4).map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link key={item.href} href={item.href} className="flex-1 flex justify-center">
               <div className={cn(
-                "flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all relative",
+                "flex flex-col items-center gap-1.5 p-1 rounded-xl transition-all relative",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}>
                 <item.icon className={cn("w-5 h-5", isActive && "scale-110")} />
-                <span className="text-[8px] font-black uppercase tracking-tighter">{item.label}</span>
+                <span className="text-[7px] font-black uppercase tracking-tighter">{item.label}</span>
                 {isActive && (
                    <motion.div
                      layoutId="bottom-bar-active"
@@ -140,6 +140,25 @@ export default function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Link Admin Dinâmico no Mobile */}
+        {user?.role === 'ADMIN' && (
+          <Link href="/admin" className="flex-1 flex justify-center">
+            <div className={cn(
+              "flex flex-col items-center gap-1.5 p-1 rounded-xl transition-all relative",
+              pathname === "/admin" ? "text-orange-500" : "text-muted-foreground"
+            )}>
+              <ShieldAlert className={cn("w-5 h-5", pathname === "/admin" && "scale-110")} />
+              <span className="text-[7px] font-black uppercase tracking-tighter">Admin</span>
+              {pathname === "/admin" && (
+                 <motion.div
+                   layoutId="bottom-bar-active"
+                   className="absolute -bottom-3 w-8 h-1 bg-orange-500 rounded-full"
+                 />
+              )}
+            </div>
+          </Link>
+        )}
       </nav>
     </>
   );
