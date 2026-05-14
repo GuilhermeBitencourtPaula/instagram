@@ -9,38 +9,27 @@ import {
   Plus,
   History,
   Sparkles,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuthStore } from "@/store/authStore";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import Link from "next/link";
+import { toast } from "sonner";
 
-interface DashboardStats {
-  totalSearches: number;
-  totalPosts: number;
-  totalInsights: number;
-  avgEngagement: string;
-}
-
-interface RecentSearch {
-  id: number;
-  query: string;
-  createdAt: string;
-  status: string;
-  isFavorite: boolean;
-  _count: { posts: number };
-}
+// ... (stats interface and DashboardStats/RecentSearch remains same)
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
 
-  // Queries com TanStack Query (Gerenciamento Automático)
+  // Queries...
   const { data: stats, isLoading: loadingStats } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: async () => (await api.get("/searches/stats")).data,
-    staleTime: 1000 * 60 * 5, // Cache de 5 minutos
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: searches, isLoading: loadingSearches } = useQuery<RecentSearch[]>({
@@ -49,7 +38,30 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 2,
   });
 
+  // Mutação para deletar pesquisa
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/searches/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recent-searches'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      toast.success("Pesquisa removida com sucesso");
+    },
+    onError: () => {
+      toast.error("Erro ao remover pesquisa");
+    }
+  });
+
+  const handleDelete = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    if (confirm("Tem certeza que deseja excluir esta pesquisa?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
   const statsConfig = [
+// ... (statsConfig remains same)
     { label: "Pesquisas Realizadas", value: stats?.totalSearches || 0, icon: Search, color: "text-blue-500", bg: "bg-blue-500/10" },
     { label: "Posts Analisados", value: stats?.totalPosts || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
     { label: "Insights da IA", value: stats?.totalInsights || 0, icon: Sparkles, color: "text-orange-500", bg: "bg-orange-500/10" },
@@ -130,15 +142,25 @@ export default function DashboardPage() {
                         </p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        {search.isFavorite && (
-                           <span className="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Favorito</span>
-                        )}
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase ${
-                           search.status === 'COMPLETED' ? 'bg-green-500/20 text-green-500' : 'bg-blue-500/20 text-blue-500'
-                        }`}>
-                           {search.status}
-                        </span>
+                    <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-end gap-2">
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase ${
+                               search.status === 'COMPLETED' ? 'bg-green-500/20 text-green-500' : 
+                               search.status === 'FAILED' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'
+                            }`}>
+                               {search.status}
+                            </span>
+                            {search.isFavorite && (
+                               <span className="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Favorito</span>
+                            )}
+                        </div>
+                        <button 
+                          onClick={(e) => handleDelete(e, search.id)}
+                          disabled={deleteMutation.isPending}
+                          className="p-2.5 rounded-xl bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
+                        >
+                           {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </button>
                     </div>
                     </div>
                 ))

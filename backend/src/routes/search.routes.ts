@@ -20,6 +20,9 @@ router.get('/', getUserSearches);
 // @route GET /api/searches/stats
 router.get('/stats', cacheMiddleware(600), getStats);
 
+// @route DELETE /api/searches/:id
+router.delete('/:id', deleteSearch);
+
 // @route PATCH /api/searches/:id/favorite
 router.patch('/:id/favorite', toggleFavorite);
 
