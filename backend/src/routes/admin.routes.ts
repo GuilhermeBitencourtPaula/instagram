@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAdminStats, getAllUsers, getSystemLogs } from '../controllers/admin.controller';
+import { getAdminStats, getAllUsers, getSystemLogs, getUserDetails } from '../controllers/admin.controller';
 import { authenticateToken, authorizeRole } from '../middlewares/auth.middleware';
 
 const router = Router();
