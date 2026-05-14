@@ -14,7 +14,8 @@ import {
   ShieldAlert, 
   LockKeyhole,
   CheckCircle2,
-  Camera
+  Camera,
+  ArrowLeft
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
@@ -52,6 +53,34 @@ export default function RegisterPage() {
         <div className="absolute bottom-[-15%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[150px] rounded-full animate-pulse-subtle" />
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="absolute top-6 md:top-8 left-6 md:left-8 z-50"
+      >
+        <Link href="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+          <div className="p-2 rounded-full bg-white/5 border border-white/5 group-hover:bg-white/10 group-hover:border-white/10 transition-all">
+            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+          </div>
+          <span className="text-xs md:text-sm font-bold tracking-tight">Voltar para o site</span>
+        </Link>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="absolute top-6 md:top-8 left-6 md:left-8 z-50"
+      >
+        <Link href="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+          <div className="p-2 rounded-full bg-white/5 border border-white/5 group-hover:bg-white/10 group-hover:border-white/10 transition-all">
+            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+          </div>
+          <span className="text-xs md:text-sm font-bold tracking-tight">Voltar para o site</span>
+        </Link>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
