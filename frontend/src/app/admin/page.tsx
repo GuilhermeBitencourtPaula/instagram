@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Shield, Users, Activity, Settings, Database, AlertCircle, CheckCircle2, Loader2, Mail, Calendar, Search, ArrowRight, MoreVertical, ExternalLink, Clock, Instagram, X } from "lucide-react";
+import { Shield, Users, Activity, Settings, Database, AlertCircle, CheckCircle2, Loader2, Mail, Calendar, Search, ArrowRight, MoreVertical, ExternalLink, Clock, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { InstagramIcon } from "@/components/ui/InstagramIcon";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -309,7 +310,7 @@ export default function AdminPage() {
                         <div key={s.id} className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800 flex justify-between items-center group hover:border-orange-500/30 transition-all">
                           <div className="flex items-center gap-4">
                             <div className="h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center">
-                               <Instagram className="h-5 w-5 text-slate-500 group-hover:text-orange-500 transition-colors" />
+                               <InstagramIcon className="h-5 w-5 text-slate-500 group-hover:text-orange-500 transition-colors" />
                             </div>
                             <div className="space-y-0.5">
                               <p className="font-bold text-white tracking-tight">"{s.query}"</p>
