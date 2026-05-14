@@ -4,7 +4,7 @@ import logger from '../utils/logger';
 
 export const getAlerts = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.userId;
     const alerts = await prisma.scheduledSearch.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' }
@@ -18,7 +18,7 @@ export const getAlerts = async (req: Request, res: Response) => {
 
 export const createAlert = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.userId;
     const { query, frequency } = req.body;
 
     if (!query) {
@@ -49,7 +49,7 @@ export const createAlert = async (req: Request, res: Response) => {
 export const updateAlert = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.userId;
     const { isActive, frequency, query } = req.body;
 
     const existingAlert = await prisma.scheduledSearch.findFirst({
@@ -83,7 +83,7 @@ export const updateAlert = async (req: Request, res: Response) => {
 export const deleteAlert = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.userId;
 
     await prisma.scheduledSearch.deleteMany({
       where: { id: Number(id), userId }
