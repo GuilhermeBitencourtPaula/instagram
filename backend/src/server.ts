@@ -9,6 +9,8 @@ import searchRoutes from './routes/search.routes';
 import instagramRoutes from './routes/instagram.routes';
 import profileRoutes from './routes/profile.routes';
 import monitoringRoutes from './routes/monitoring.routes';
+import adminRoutes from './routes/admin.routes';
+
 
 import { connectWithRetry } from './database/connection';
 import { initScheduler } from './services/scheduler.service';
@@ -59,6 +61,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/searches', searchRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/profiles', profileRoutes);
+app.use('/api/admin', adminRoutes);
+logger.info('Rotas administrativas registradas');
 logger.info('Rotas de monitoramento registradas no topo');
 
 
