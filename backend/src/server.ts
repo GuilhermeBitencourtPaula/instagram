@@ -54,12 +54,13 @@ app.use(morgan(morganFormat, {
 app.get("/health", (_, res) => res.json({ status: "online", timestamp: new Date().toISOString() }));
 
 // 4. Rotas Principais
+app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/searches', searchRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/profiles', profileRoutes);
-app.use('/api/monitoring', monitoringRoutes);
-logger.info('Rotas de monitoramento registradas');
+logger.info('Rotas de monitoramento registradas no topo');
+
 
 
 
