@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Activity, Bell, Clock, Plus, Loader2, X, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Activity, Bell, Clock, Plus, Loader2, X, Trash2, CheckCircle2, AlertCircle, Instagram } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ export default function MonitoringPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
   // Form states
   const [query, setQuery] = useState("");
@@ -43,8 +45,23 @@ export default function MonitoringPage() {
   };
 
   useEffect(() => {
-    fetchAlerts();
+    const checkConnection = async () => {
+      try {
+        const res = await api.get("/instagram/status");
+        setIsConnected(res.data.isConnected);
+        if (res.data.isConnected) {
+          fetchAlerts();
+        } else {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        setIsConnected(false);
+        setIsLoading(false);
+      }
+    };
+    checkConnection();
   }, []);
+
 
   const handleOpenModal = (alert: Alert | null = null) => {
     if (alert) {
@@ -128,7 +145,31 @@ export default function MonitoringPage() {
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
             <p className="text-muted-foreground font-medium">Sincronizando sua rede...</p>
           </div>
+        ) : isConnected === false ? (
+          <div className="flex flex-col items-center justify-center p-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-card/40 border border-white/10 p-10 rounded-[2.5rem] space-y-6 max-w-lg text-center shadow-2xl"
+            >
+              <div className="p-4 bg-primary/10 rounded-2xl w-fit mx-auto text-primary">
+                <Instagram className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-white">Monitoramento Bloqueado</h2>
+                <p className="text-muted-foreground">
+                  Você precisa conectar uma conta do Instagram Business para configurar alertas e monitorar hashtags em tempo real.
+                </p>
+              </div>
+              <Link href="/settings">
+                <Button className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg mt-4">
+                  Conectar Instagram
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
         ) : alerts.length > 0 ? (
+
           <div className="space-y-4">
             {alerts.map((item) => (
               <motion.div 

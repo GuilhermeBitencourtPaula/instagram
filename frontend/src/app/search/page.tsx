@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search as SearchIcon, 
@@ -14,7 +14,10 @@ import {
   Zap,
   TrendingUp,
   Target,
-  Star
+  Star,
+  Instagram,
+  Lock,
+  AlertCircle
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/Button";
@@ -24,17 +27,30 @@ import ResultCard from "@/components/search/ResultCard";
 import AiInsightsCard from "@/components/analytics/AiInsightsCard";
 import Link from "next/link";
 
-
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [aiInsight, setAiInsight] = useState<any>(null);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const res = await api.get("/instagram/status");
+        setIsConnected(res.data.isConnected);
+      } catch (error) {
+        console.error("Erro ao verificar conexão:", error);
+        setIsConnected(false);
+      }
+    };
+    checkConnection();
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim() || !isConnected) return;
 
     setIsSearching(true);
     try {
@@ -102,7 +118,6 @@ export default function SearchPage() {
       duration: 6000,
     });
   };
-
 
   if (results) {
     return (
@@ -220,81 +235,125 @@ export default function SearchPage() {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[70vh] space-y-12 text-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="space-y-4"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            IA Powered Research
-          </div>
-          <h1 className="text-5xl font-bold tracking-tight text-white">
-            O que vamos <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">descobrir</span> hoje?
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Digite um nicho, marca ou palavra-chave e nossa IA coletará e analisará as maiores tendências do Instagram para você.
-          </p>
-        </motion.div>
-
-        <form onSubmit={handleSearch} className="w-full relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-accent/50 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-          <div className="relative flex items-center bg-card/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2 pr-4 shadow-2xl">
-            <div className="flex-1 flex items-center px-4 md:px-6">
-              <SearchIcon className="w-6 h-6 text-muted-foreground mr-4" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ex: Moda Sustentável, Dropshipping de Relógios..."
-                className="w-full bg-transparent border-none text-lg md:text-xl text-white placeholder:text-muted-foreground/50 focus:ring-0 outline-none py-4"
-                disabled={isSearching}
-              />
+        {isConnected === false ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card/40 border border-white/10 p-10 rounded-[2.5rem] space-y-6 max-w-lg shadow-2xl relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full" />
+            <div className="p-4 bg-primary/10 rounded-2xl w-fit mx-auto text-primary">
+              <Lock className="w-8 h-8" />
             </div>
-            <Button 
-              type="submit" 
-              className="rounded-full px-6 md:px-8 py-5 md:py-6 h-auto whitespace-nowrap"
-              disabled={!query.trim() || isSearching}
-            >
-              {isSearching ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
-              ) : (
-                <>
-                  <span className="hidden md:inline">Analisar com IA</span>
-                  <span className="md:hidden">Analisar</span>
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <div 
-              onClick={showSearchTip}
-              className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group"
-            >
-                <div className="p-3 bg-white/5 rounded-xl group-hover:bg-primary/20 group-hover:text-primary transition-colors">
-                    <Info className="w-5 h-5" />
-                </div>
-                <div>
-                    <h4 className="text-sm font-bold">Dica de Busca</h4>
-                    <p className="text-xs text-muted-foreground">Use termos específicos para melhores insights da IA.</p>
-                </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-white">Conexão Necessária</h2>
+              <p className="text-muted-foreground">
+                Para realizar pesquisas de mercado reais e extrair insights da IA, você precisa conectar sua conta do Instagram Business primeiro.
+              </p>
             </div>
-            <Link href="/dashboard" className="w-full">
-              <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group h-full">
-                  <div className="p-3 bg-white/5 rounded-xl group-hover:bg-accent/20 group-hover:text-accent transition-colors">
-                      <History className="w-5 h-5" />
-                  </div>
-                  <div>
-                      <h4 className="text-sm font-bold">Ver Histórico</h4>
-                      <p className="text-xs text-muted-foreground">Acesse suas pesquisas anteriores e insights salvos.</p>
-                  </div>
-              </div>
+            <Link href="/settings">
+              <Button className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg flex items-center justify-center gap-2 mt-4">
+                <Instagram className="w-5 h-5" />
+                Conectar Agora
+              </Button>
             </Link>
-        </div>
+          </motion.div>
+        ) : isConnected === null ? (
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-muted-foreground animate-pulse">Verificando status da conta...</p>
+          </div>
+        ) : (
+          <>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="space-y-4"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                IA Powered Research
+              </div>
+              <h1 className="text-5xl font-bold tracking-tight text-white">
+                O que vamos <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">descobrir</span> hoje?
+              </h1>
+              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+                Digite um nicho, marca ou palavra-chave e nossa IA coletará e analisará as maiores tendências do Instagram para você.
+              </p>
+            </motion.div>
 
+            <div className="w-full space-y-4">
+              <form onSubmit={handleSearch} className="w-full relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-accent/50 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative flex items-center bg-card/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2 pr-4 shadow-2xl">
+                  <div className="flex-1 flex items-center px-4 md:px-6">
+                    <SearchIcon className="w-6 h-6 text-muted-foreground mr-4" />
+                    <input
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Ex: Moda Sustentável, Dropshipping de Relógios..."
+                      className="w-full bg-transparent border-none text-lg md:text-xl text-white placeholder:text-muted-foreground/50 focus:ring-0 outline-none py-4"
+                      disabled={isSearching}
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="rounded-full px-6 md:px-8 py-5 md:py-6 h-auto whitespace-nowrap"
+                    disabled={!query.trim() || isSearching}
+                  >
+                    {isSearching ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <>
+                        <span className="hidden md:inline">Analisar com IA</span>
+                        <span className="md:hidden">Analisar</span>
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+
+              {/* Disclaimer Notice */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-center justify-center gap-2 text-[10px] md:text-xs text-muted-foreground font-medium uppercase tracking-widest px-4 py-2 bg-white/5 border border-white/5 rounded-full w-fit mx-auto"
+              >
+                <AlertCircle className="w-3 h-3 text-primary" />
+                Os resultados são extraídos em tempo real via API Oficial do Instagram
+              </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <div 
+                  onClick={showSearchTip}
+                  className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group"
+                >
+                    <div className="p-3 bg-white/5 rounded-xl group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+                        <Info className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold">Dica de Busca</h4>
+                        <p className="text-xs text-muted-foreground">Use termos específicos para melhores insights da IA.</p>
+                    </div>
+                </div>
+                <Link href="/dashboard" className="w-full">
+                  <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group h-full">
+                      <div className="p-3 bg-white/5 rounded-xl group-hover:bg-accent/20 group-hover:text-accent transition-colors">
+                          <History className="w-5 h-5" />
+                      </div>
+                      <div>
+                          <h4 className="text-sm font-bold">Ver Histórico</h4>
+                          <p className="text-xs text-muted-foreground">Acesse suas pesquisas anteriores e insights salvos.</p>
+                      </div>
+                  </div>
+                </Link>
+            </div>
+          </>
+        )}
 
         <AnimatePresence>
           {isSearching && (
@@ -315,6 +374,7 @@ export default function SearchPage() {
                     <p className="text-muted-foreground animate-pulse leading-relaxed">
                         Coletando posts, analisando perfis e gerando insights estratégicos para o nicho de <span className="text-white font-bold italic">"{query}"</span>.
                     </p>
+                    <p className="text-[10px] text-primary/60 uppercase tracking-widest mt-4">Conexão Segura Instagram Ativa</p>
                 </div>
               </div>
             </motion.div>
@@ -324,3 +384,4 @@ export default function SearchPage() {
     </DashboardLayout>
   );
 }
+
