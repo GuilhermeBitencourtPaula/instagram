@@ -99,10 +99,10 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto space-y-10">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white flex items-center gap-3">
               Olá, {user?.name?.split(' ')[0] || 'Pesquisador'} <span className="animate-bounce">👋</span>
             </h1>
-            <p className="text-muted-foreground">Resumo da sua inteligência de mercado hoje.</p>
+            <p className="text-sm md:text-base text-muted-foreground">Resumo da sua inteligência de mercado hoje.</p>
           </div>
           <Link href="/search">
             <button className="bg-white text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/90 transition-all shadow-lg active:scale-95">

@@ -22,7 +22,7 @@ export default function DashboardLayout({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="p-8 pb-16"
+            className="p-4 md:p-8 pb-24 lg:pb-16"
           >
             {children}
           </motion.div>

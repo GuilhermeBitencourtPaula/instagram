@@ -133,84 +133,62 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* User Table Section */}
-        <section className="bg-slate-900/30 border border-slate-800/50 rounded-[3rem] p-8 backdrop-blur-3xl">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-black text-white">Usuários da Plataforma</h2>
-              <p className="text-slate-500 font-medium">Controle granular de acessos e atividades.</p>
-            </div>
-            <div className="relative w-full md:w-96 group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-orange-500 transition-colors" />
-              <Input 
-                placeholder="Pesquisar por nome, ID ou e-mail..." 
-                className="pl-14 h-14 bg-slate-950/50 border-slate-800 rounded-3xl focus:ring-orange-500/20 transition-all text-white placeholder:text-slate-600"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-
+        {/* Tabela de Usuários - Container com Scroll */}
+        <div className="bg-card/30 backdrop-blur-md border border-white/5 rounded-[2rem] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
-                <tr className="border-b border-slate-800/50">
-                  <th className="pb-6 pl-4 text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Identidade</th>
-                  <th className="pb-6 text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Permissão</th>
-                  <th className="pb-6 text-xs font-black text-slate-500 uppercase tracking-[0.2em] text-center">Atividade</th>
-                  <th className="pb-6 text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Cadastro</th>
-                  <th className="pb-6 pr-4 text-right text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Ações</th>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Usuário</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Plano</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Última Atividade</th>
+                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/30">
+              <tbody className="divide-y divide-white/5">
                 {isLoading ? (
-                  Array(5).fill(0).map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td colSpan={5} className="py-8 bg-slate-800/5 rounded-2xl mb-2" />
-                    </tr>
-                  ))
+                   Array(5).fill(0).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td colSpan={5} className="p-8 h-20 bg-white/[0.01]" />
+                      </tr>
+                   ))
                 ) : filteredUsers.map((user) => (
-                  <tr key={user.id} className="group hover:bg-slate-800/10 transition-all rounded-2xl">
-                    <td className="py-6 pl-4">
+                  <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-xl font-black text-orange-500 group-hover:scale-110 transition-transform">
+                        <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold shrink-0">
                           {user.name.charAt(0)}
                         </div>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-white text-lg">{user.name}</p>
-                          <p className="text-xs text-slate-500 flex items-center gap-2">
-                             <Mail className="h-3 w-3" /> {user.email}
-                          </p>
+                        <div className="min-w-0">
+                          <p className="font-bold text-white text-sm truncate">{user.name}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-6">
-                      <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
+                    <td className="p-6">
+                      <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
                         user.role === 'ADMIN' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : 'bg-slate-800/50 text-slate-400 border-slate-700/50'
                       }`}>
                         {user.role}
                       </span>
                     </td>
-                    <td className="py-6">
-                       <div className="text-center space-y-1">
-                          <p className="text-xl font-black text-white">{user._count.searches}</p>
-                          <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">Pesquisas</p>
+                    <td className="p-6">
+                       <div className="space-y-0.5">
+                          <p className="text-sm font-black text-white">{user._count.searches}</p>
+                          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Pesquisas</p>
                        </div>
                     </td>
-                    <td className="py-6">
-                       <div className="space-y-1">
-                          <p className="text-sm font-bold text-white">{new Date(user.createdAt).toLocaleDateString()}</p>
-                          <p className="text-[10px] font-medium text-slate-600">{new Date(user.createdAt).toLocaleTimeString()}</p>
-                       </div>
+                    <td className="p-6 text-xs text-slate-400">
+                      {new Date(user.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="py-6 pr-4 text-right">
-                       <Button 
-                         onClick={() => handleShowDetails(user.id)}
-                         variant="outline" 
-                         className="h-10 px-6 rounded-xl border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-orange-500/30 gap-2 font-bold text-xs"
-                       >
-                         Detalhes <ArrowRight className="h-3.5 w-3.5" />
-                       </Button>
+                    <td className="p-6 text-right">
+                      <button 
+                        onClick={() => handleShowDetails(user.id)}
+                        className="bg-white/5 hover:bg-white text-muted-foreground hover:text-black px-4 py-2 rounded-xl text-[10px] font-black transition-all active:scale-95 border border-white/5 whitespace-nowrap"
+                      >
+                        VER DETALHES
+                      </button>
                     </td>
                   </tr>
                 ))}
