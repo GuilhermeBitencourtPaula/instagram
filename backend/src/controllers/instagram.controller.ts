@@ -8,7 +8,7 @@ export const getAuthUrl = async (req: Request, res: Response) => {
   const baseUrl = process.env.BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
   const redirectUri = encodeURIComponent(`${baseUrl}/api/instagram/callback`);
   
-  const userId = req.user?.id || (req.user as any)?.userId;
+  const userId = req.user?.userId || (req.user as any)?.userId;
   console.log('Gerando Auth URL para o usuário:', userId);
 
   const scopes = encodeURIComponent([
@@ -30,12 +30,12 @@ export const getAuthUrl = async (req: Request, res: Response) => {
   res.json({ url: authUrl });
 };
 
-export const handleCallback = async (req: AuthRequest, res: Response) => {
+export const handleCallback = async (req: Request, res: Response) => {
   const { code, state } = req.query;
   
   console.log('Callback recebido. Code:', !!code, 'State:', state);
 
-  let userId = req.user?.id;
+  let userId = req.user?.userId;
 
   // Se o middleware não pegou o user, tentamos pegar do state
   if (!userId && state) {
