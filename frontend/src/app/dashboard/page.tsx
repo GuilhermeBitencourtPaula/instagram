@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   TrendingUp, 
   Users, 
@@ -10,7 +11,8 @@ import {
   History,
   Sparkles,
   Loader2,
-  Trash2
+  Trash2,
+  AlertCircle
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuthStore } from "@/store/authStore";
@@ -61,21 +63,31 @@ export default function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: ['recent-searches'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast.success("Pesquisa removida com sucesso");
+      setDeleteModal({ isOpen: false, id: null });
     },
     onError: () => {
       toast.error("Erro ao remover pesquisa");
+      setDeleteModal({ isOpen: false, id: null });
     }
   });
 
-  const handleDelete = (e: React.MouseEvent, id: number) => {
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null
+  });
+
+  const handleDeleteClick = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    if (confirm("Tem certeza que deseja excluir esta pesquisa?")) {
-      deleteMutation.mutate(id);
+    setDeleteModal({ isOpen: true, id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal.id) {
+      deleteMutation.mutate(deleteModal.id);
     }
   };
 
   const statsConfig = [
-// ... (statsConfig remains same)
     { label: "Pesquisas Realizadas", value: stats?.totalSearches || 0, icon: Search, color: "text-blue-500", bg: "bg-blue-500/10" },
     { label: "Posts Analisados", value: stats?.totalPosts || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
     { label: "Insights da IA", value: stats?.totalInsights || 0, icon: Sparkles, color: "text-orange-500", bg: "bg-orange-500/10" },
@@ -169,7 +181,7 @@ export default function DashboardPage() {
                             )}
                         </div>
                         <button 
-                          onClick={(e) => handleDelete(e, search.id)}
+                          onClick={(e) => handleDeleteClick(e, search.id)}
                           disabled={deleteMutation.isPending}
                           className="p-2.5 rounded-xl bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
                         >
@@ -206,6 +218,60 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmação de Exclusão Customizado */}
+      <AnimatePresence>
+        {deleteModal.isOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDeleteModal({ isOpen: false, id: null })}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                 <Trash2 className="h-24 w-24 text-white" />
+              </div>
+
+              <div className="flex flex-col items-center text-center space-y-6 relative z-10">
+                <div className="h-16 w-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+                   <AlertCircle className="h-8 w-8 text-red-500" />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black text-white">Excluir Pesquisa?</h3>
+                  <p className="text-sm text-slate-400 font-medium">
+                    Esta ação é permanente e removerá todos os dados coletados desta busca.
+                  </p>
+                </div>
+
+                <div className="flex flex-col w-full gap-3">
+                   <button
+                     onClick={confirmDelete}
+                     disabled={deleteMutation.isPending}
+                     className="w-full h-14 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-2xl font-black text-sm transition-all active:scale-95 flex items-center justify-center gap-2"
+                   >
+                     {deleteMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "SIM, EXCLUIR AGORA"}
+                   </button>
+                   <button
+                     onClick={() => setDeleteModal({ isOpen: false, id: null })}
+                     className="w-full h-14 bg-transparent hover:bg-white/5 text-slate-400 rounded-2xl font-bold text-sm transition-all"
+                   >
+                     CANCELAR
+                   </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 }
