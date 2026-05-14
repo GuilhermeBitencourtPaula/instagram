@@ -13,6 +13,8 @@ router.use(authenticateToken);
 
 router.get('/stats', getAdminStats);
 router.get('/users', getAllUsers);
+router.get('/users/:id', getUserDetails);
 router.get('/logs', getSystemLogs);
+
 
 export default router;
