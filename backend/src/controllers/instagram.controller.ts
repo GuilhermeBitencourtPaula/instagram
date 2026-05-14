@@ -8,28 +8,55 @@ export const getAuthUrl = async (req: Request, res: Response) => {
   const baseUrl = process.env.BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
   const redirectUri = encodeURIComponent(`${baseUrl}/api/instagram/callback`);
   
+  const userId = req.user?.id || (req.user as any)?.userId;
+  console.log('Gerando Auth URL para o usuário:', userId);
+
   const scopes = encodeURIComponent([
     'instagram_basic',
-    'instagram_manage_insights',
-    'pages_show_list',
-    'pages_read_engagement'
+    'instagram_manage_insights'
   ].join(','));
 
-  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=viryon_${Date.now()}`;
+  // State robusto com userId
+  const stateObj = {
+    userId,
+    timestamp: Date.now(),
+    app: 'viryon'
+  };
+  
+  const state = encodeURIComponent(JSON.stringify(stateObj));
+
+  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=${state}`;
 
   res.json({ url: authUrl });
 };
 
-export const handleCallback = async (req: Request, res: Response) => {
-  const { code } = req.query;
-  const userId = req.user?.userId;
+export const handleCallback = async (req: AuthRequest, res: Response) => {
+  const { code, state } = req.query;
+  
+  console.log('Callback recebido. Code:', !!code, 'State:', state);
 
-  if (!code || typeof code !== 'string') {
-    return res.status(400).json({ message: 'Código de autorização não fornecido.' });
+  let userId = req.user?.id;
+
+  // Se o middleware não pegou o user, tentamos pegar do state
+  if (!userId && state) {
+    try {
+      const decodedState = JSON.parse(decodeURIComponent(state as string));
+      userId = decodedState.userId;
+      console.log('UserId recuperado do state:', userId);
+    } catch (e) {
+      console.error('Erro ao decodificar state no callback:', e);
+    }
   }
 
   if (!userId) {
-    return res.status(401).json({ message: 'Usuário não autenticado.' });
+    return res.status(401).json({ 
+      message: "ERRO DE AUTENTICAÇÃO: Usuário não identificado no callback. Por favor, tente reconectar.",
+      debug_state: !!state 
+    });
+  }
+
+  if (!code || typeof code !== 'string') {
+    return res.status(400).json({ message: 'Código de autorização não fornecido.' });
   }
 
   try {
