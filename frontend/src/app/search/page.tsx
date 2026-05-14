@@ -22,6 +22,8 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import ResultCard from "@/components/search/ResultCard";
 import AiInsightsCard from "@/components/analytics/AiInsightsCard";
+import Link from "next/link";
+
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -93,6 +95,14 @@ export default function SearchPage() {
     setAiInsight(null);
     setQuery("");
   };
+
+  const showSearchTip = () => {
+    toast.info("Dica Estratégica", {
+      description: "Para melhores resultados, use termos específicos como 'Moda Fitness Feminina' em vez de apenas 'Moda'. A IA analisa melhor nichos bem definidos.",
+      duration: 6000,
+    });
+  };
+
 
   if (results) {
     return (
@@ -260,7 +270,10 @@ export default function SearchPage() {
         </form>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group">
+            <div 
+              onClick={showSearchTip}
+              className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group"
+            >
                 <div className="p-3 bg-white/5 rounded-xl group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                     <Info className="w-5 h-5" />
                 </div>
@@ -269,16 +282,19 @@ export default function SearchPage() {
                     <p className="text-xs text-muted-foreground">Use termos específicos para melhores insights da IA.</p>
                 </div>
             </div>
-            <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group">
-                <div className="p-3 bg-white/5 rounded-xl group-hover:bg-accent/20 group-hover:text-accent transition-colors">
-                    <History className="w-5 h-5" />
-                </div>
-                <div>
-                    <h4 className="text-sm font-bold">Ver Histórico</h4>
-                    <p className="text-xs text-muted-foreground">Acesse suas pesquisas anteriores e insights salvos.</p>
-                </div>
-            </div>
+            <Link href="/dashboard" className="w-full">
+              <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-4 text-left border border-white/5 hover:bg-white/10 transition-all cursor-pointer group h-full">
+                  <div className="p-3 bg-white/5 rounded-xl group-hover:bg-accent/20 group-hover:text-accent transition-colors">
+                      <History className="w-5 h-5" />
+                  </div>
+                  <div>
+                      <h4 className="text-sm font-bold">Ver Histórico</h4>
+                      <p className="text-xs text-muted-foreground">Acesse suas pesquisas anteriores e insights salvos.</p>
+                  </div>
+              </div>
+            </Link>
         </div>
+
 
         <AnimatePresence>
           {isSearching && (

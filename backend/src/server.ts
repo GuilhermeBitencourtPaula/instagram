@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.routes';
 import searchRoutes from './routes/search.routes';
 import instagramRoutes from './routes/instagram.routes';
 import profileRoutes from './routes/profile.routes';
+import monitoringRoutes from './routes/monitoring.routes';
+
 import { connectWithRetry } from './database/connection';
 import { initScheduler } from './services/scheduler.service';
 
@@ -56,6 +58,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/searches', searchRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/profiles', profileRoutes);
+app.use('/api/monitoring', monitoringRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 
