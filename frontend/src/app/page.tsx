@@ -35,7 +35,7 @@ export default function LandingPage() {
       <section className="relative pt-40 pb-20 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-orange-500/10 blur-[120px] rounded-full opacity-20 pointer-events-none" />
         
-        <div className="max-w-5xl mx-auto text-center space-y-8 relative">
+        <div className="max-w-4xl mx-auto text-center space-y-8 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -76,16 +76,16 @@ export default function LandingPage() {
 
           {/* Preview do Sistema */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-20 relative group"
+            className="mt-16 relative group max-w-4xl mx-auto"
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-purple-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
-            <div className="relative bg-slate-900/50 border border-white/10 rounded-[2rem] p-4 backdrop-blur-sm overflow-hidden">
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-purple-600/20 rounded-[2rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+            <div className="relative bg-[#0a0a0a] border border-white/5 rounded-[1.5rem] p-2 backdrop-blur-sm overflow-hidden">
                <img 
-                 src="/viryon_dashboard_preview_1778794273024.png" 
-                 alt="Viryon Intelligence Dashboard" 
+                 src="/dashboard-pro.png" 
+                 alt="Viryon Professional Dashboard" 
                  className="rounded-xl opacity-90 group-hover:opacity-100 transition-all duration-700 w-full"
                />
                {/* Overlay de Vidro Simulado */}
