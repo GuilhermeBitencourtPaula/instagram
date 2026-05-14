@@ -86,9 +86,9 @@ export default function LandingPage() {
             <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-purple-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
             <div className="relative bg-slate-900/50 border border-white/10 rounded-[2rem] p-4 backdrop-blur-sm overflow-hidden">
                <img 
-                 src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=2000" 
-                 alt="Dashboard Preview" 
-                 className="rounded-xl grayscale-[0.2] opacity-80 group-hover:opacity-100 transition-all duration-700"
+                 src="/viryon_dashboard_preview_1778794273024.png" 
+                 alt="Viryon Intelligence Dashboard" 
+                 className="rounded-xl opacity-90 group-hover:opacity-100 transition-all duration-700 w-full"
                />
                {/* Overlay de Vidro Simulado */}
                <div className="absolute bottom-10 left-10 right-10 p-8 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-between">
