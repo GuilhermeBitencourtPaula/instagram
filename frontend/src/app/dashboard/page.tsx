@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { 
   TrendingUp, 
@@ -14,62 +13,69 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuthStore } from "@/store/authStore";
+import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import Link from "next/link";
 
+interface DashboardStats {
+  totalSearches: number;
+  totalPosts: number;
+  totalInsights: number;
+  avgEngagement: string;
+}
+
+interface RecentSearch {
+  id: number;
+  query: string;
+  createdAt: string;
+  status: string;
+  isFavorite: boolean;
+  _count: { posts: number };
+}
+
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
-  const [stats, setStats] = useState<any>(null);
-  const [recentSearches, setRecentSearches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [statsRes, searchesRes] = await Promise.all([
-          api.get("/searches/stats"),
-          api.get("/searches")
-        ]);
-        setStats(statsRes.data);
-        setRecentSearches(searchesRes.data.slice(0, 5));
-      } catch (error) {
-        console.error("Erro ao carregar dados do dashboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
+  // Queries com TanStack Query (Gerenciamento Automático)
+  const { data: stats, isLoading: loadingStats } = useQuery<DashboardStats>({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => (await api.get("/searches/stats")).data,
+    staleTime: 1000 * 60 * 5, // Cache de 5 minutos
+  });
+
+  const { data: searches, isLoading: loadingSearches } = useQuery<RecentSearch[]>({
+    queryKey: ['recent-searches'],
+    queryFn: async () => (await api.get("/searches")).data,
+    staleTime: 1000 * 60 * 2,
+  });
 
   const statsConfig = [
-    { label: "Pesquisas Realizadas", value: stats?.totalSearches || "0", icon: Search, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Posts Analisados", value: stats?.totalPosts || "0", icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { label: "Insights da IA", value: stats?.totalInsights || "0", icon: Sparkles, color: "text-orange-500", bg: "bg-orange-500/10" },
+    { label: "Pesquisas Realizadas", value: stats?.totalSearches || 0, icon: Search, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Posts Analisados", value: stats?.totalPosts || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Insights da IA", value: stats?.totalInsights || 0, icon: Sparkles, color: "text-orange-500", bg: "bg-orange-500/10" },
     { label: "Engajamento Médio", value: stats?.avgEngagement || "0%", icon: TrendingUp, color: "text-green-500", bg: "bg-green-500/10" },
   ];
 
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto space-y-10">
-        {/* Header Section */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-1">
             <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
               Olá, {user?.name?.split(' ')[0] || 'Pesquisador'} <span className="animate-bounce">👋</span>
             </h1>
-            <p className="text-muted-foreground">Aqui está o resumo da sua inteligência de mercado hoje.</p>
+            <p className="text-muted-foreground">Resumo da sua inteligência de mercado hoje.</p>
           </div>
           <Link href="/search">
-            <button className="bg-white text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/90 transition-all shadow-lg shadow-white/5 active:scale-95">
+            <button className="bg-white text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/90 transition-all shadow-lg active:scale-95">
                 <Plus className="w-5 h-5" />
                 Nova Pesquisa
             </button>
           </Link>
         </header>
 
-        {/* Stats Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {loading ? (
+          {loadingStats ? (
              Array(4).fill(0).map((_, i) => (
                 <div key={i} className="bg-card/40 border border-white/5 p-6 rounded-[2rem] h-32 animate-pulse" />
              ))
@@ -86,7 +92,6 @@ export default function DashboardPage() {
                     <div className={`${stat.bg} ${stat.color} p-3 rounded-2xl`}>
                     <stat.icon className="w-6 h-6" />
                     </div>
-                    {/* Simplified trend */}
                     <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-full">+Realtime</span>
                 </div>
                 <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
@@ -96,9 +101,7 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Main Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Researches */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold flex items-center gap-2 text-white">
@@ -109,12 +112,12 @@ export default function DashboardPage() {
             </div>
             
             <div className="space-y-4">
-              {loading ? (
+              {loadingSearches ? (
                  <div className="flex items-center justify-center p-12">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                  </div>
-              ) : recentSearches.length > 0 ? (
-                recentSearches.map((search, i) => (
+              ) : (searches || []).length > 0 ? (
+                (searches || []).slice(0, 5).map((search) => (
                     <div key={search.id} className="bg-card/40 border border-white/5 p-5 rounded-2xl flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center">
@@ -123,7 +126,7 @@ export default function DashboardPage() {
                         <div>
                         <h4 className="font-bold text-white">Busca: {search.query}</h4>
                         <p className="text-xs text-muted-foreground">
-                            {new Date(search.createdAt).toLocaleDateString()} • {search._count.posts} posts coletados
+                            {new Date(search.createdAt).toLocaleDateString()} • {search._count?.posts || 0} posts coletados
                         </p>
                         </div>
                     </div>
@@ -148,7 +151,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* AI Insights Sidebar */}
           <div className="space-y-6">
             <h2 className="text-xl font-bold flex items-center gap-2 text-white">
               <Sparkles className="w-5 h-5 text-accent" />

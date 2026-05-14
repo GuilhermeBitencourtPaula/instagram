@@ -16,21 +16,18 @@ dotenv.config();
 const app = express();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// 1. Defina estritamente quais origens têm permissão de acesso
+// 1. Configuração Robusta de CORS
 const allowedOrigins = [
-  'https://viryon.vercel.app', // Seu app de produção na Vercel
-  'https://vyrion.vercel.app', // Variação de segurança
-  'http://localhost:3000',      // Seu ambiente de testes local (Next.js)
-  'http://localhost:3001'       // Backend local
+  'https://viryon.vercel.app',
+  'https://vyrion.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3001'
 ];
 
-// 2. Aplique a configuração do CORS antes das rotas
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permite requisições sem "origin" (como chamadas diretas de servidores backend ou Postman)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+  origin: (origin, callback) => {
+    // Permite requisições sem "origin" (servidor-servidor ou ferramentas de teste)
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
       callback(new Error('Acesso bloqueado pelas políticas de CORS do Viryon'));
@@ -38,24 +35,23 @@ app.use(cors({
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true // Essencial se você for trafegar cookies ou tokens JWT entre domínios
+  credentials: true
 }));
 
-// 3. Middlewares de parseamento padrão
+// 2. Middlewares de Segurança e Log
+app.use(helmet({ contentSecurityPolicy: false })); // Proteção contra ataques comuns
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Helmet desativado temporariamente para garantir a eficácia do plano de CORS
-// app.use(helmet());
+const morganFormat = NODE_ENV === 'production' ? 'combined' : 'dev';
+app.use(morgan(morganFormat, { 
+  stream: { write: (msg) => logger.http(msg.trim()) } 
+}));
 
-const stream = { write: (msg: string) => logger.http(msg.trim()) };
-app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev', { stream }));
+// 3. Rotas de Saúde e Status
+app.get("/health", (_, res) => res.json({ status: "online", timestamp: new Date().toISOString() }));
 
-// Rotas de Teste
-app.get("/", (_, res) => res.json({ message: "Viryon API Online", cors: "Permissive" }));
-app.get("/health", (_, res) => res.json({ status: "online" }));
-
-// Rotas do Sistema
+// 4. Rotas Principais
 app.use('/api/auth', authRoutes);
 app.use('/api/searches', searchRoutes);
 app.use('/api/instagram', instagramRoutes);
@@ -67,15 +63,15 @@ async function startServer() {
   const portNum = Number(PORT);
   
   app.listen(portNum, '0.0.0.0', () => {
-    console.log(`🚀 Viryon Server is LIVE on port ${portNum}`);
+    console.log(`🚀 Viryon Server LIVE | Port: ${portNum} | Mode: ${NODE_ENV}`);
     initScheduler();
   });
 
   try {
     await connectWithRetry();
-    console.log("✅ Database connected successfully");
+    console.log("✅ Database connected");
   } catch (error: any) {
-    console.error(`⚠️ Database connection warning: ${error.message}`);
+    logger.error(`⚠️ Database failure: ${error.message}`);
   }
 }
 
