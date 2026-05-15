@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { BarChart3, TrendingUp, Users, PieChart, Loader2, Search, FileText, Zap } from "lucide-react";
+import { BarChart3, TrendingUp, Users, PieChart, Loader2, Search, FileText, Zap, LayoutDashboard, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { toast } from "sonner";
