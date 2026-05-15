@@ -35,6 +35,7 @@ export default function SearchPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [aiInsight, setAiInsight] = useState<any>(null);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [sortBy, setSortBy] = useState<"likes" | "recent">("likes");
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -213,9 +214,13 @@ export default function SearchPage() {
                   <LayoutGrid className="w-5 h-5 text-primary" />
                   Posts Encontrados
                </h2>
-               <div className="flex gap-2">
+               <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-muted-foreground">Ordenar por:</span>
-                  <select className="bg-transparent text-xs font-bold text-white outline-none cursor-pointer hover:text-primary transition-colors">
+                  <select 
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="bg-[#1a1a23] border border-white/10 rounded-lg px-2 py-1 text-xs font-bold text-white outline-none cursor-pointer hover:border-primary transition-colors"
+                  >
                      <option value="likes">Mais Curtidas</option>
                      <option value="recent">Mais Recentes</option>
                   </select>
@@ -223,9 +228,14 @@ export default function SearchPage() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {results.posts?.map((post: any) => (
-                <ResultCard key={post.id} post={post} />
-              ))}
+              {results.posts
+                ?.sort((a: any, b: any) => {
+                  if (sortBy === "likes") return b.likesCount - a.likesCount;
+                  return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+                })
+                .map((post: any) => (
+                  <ResultCard key={post.id} post={post} />
+                ))}
             </div>
           </section>
         </div>

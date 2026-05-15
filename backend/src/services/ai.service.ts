@@ -16,45 +16,28 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
   }
 
   try {
-    // Format posts for the prompt
-    const postsData = posts.map(p => ({
-      caption: p.caption,
-      likes: p.likesCount,
-      comments: p.commentsCount,
-      type: p.mediaType,
-      author: p.username
-    })).slice(0, 20);
-
+    // Format minimal data for the prompt to save tokens and avoid errors
+    const postsSummary = posts.slice(0, 15).map((p, i) => 
+      `${i+1}. Legenda: ${p.caption.substring(0, 100)} | Curtidas: ${p.likesCount} | Comentários: ${p.commentsCount}`
+    ).join('\n');
+ 
     const prompt = `
-      Você é um Consultor de Crescimento no Instagram e Cientista de Dados de Marketing.
-      Sua missão é analisar os seguintes dados reais coletados de posts do Instagram sobre o termo: "${query}".
+      Analise estes dados de posts do Instagram sobre "${query}":
+      ${postsSummary}
       
-      DADOS BRUTOS:
-      ${JSON.stringify(postsData)}
-      
-      INSTRUÇÕES DE ANÁLISE:
-      1. Identifique o tom predominante (sentimento) do conteúdo.
-      2. Descubra padrões visuais ou de legenda que estão gerando mais engajamento (likes/comments ratio).
-      3. Liste hashtags secundárias que aparecem com frequência e são lucrativas.
-      4. Forneça um resumo executivo de 2 frases.
-      5. Sugira um sub-nicho específico que tenha baixa concorrência mas alto engajamento baseado nesses posts.
-
-      SAÍDA ESPERADA (JSON estrito):
-      {
-        "summary": "Resumo executivo impactante.",
-        "detectedTrends": "Lista de tendências e hashtags em destaque.",
-        "suggestedNiche": "Sub-nicho lucrativo específico com justificativa curta.",
-        "viralPatterns": "Análise técnica dos gatilhos de viralização encontrados nos posts top."
-      }
+      Gere um JSON com:
+      1. summary: Resumo da estratégia (2 frases).
+      2. detectedTrends: 3 principais hashtags ou temas.
+      3. suggestedNiche: Um sub-nicho lucrativo.
+      4. viralPatterns: O que faz esses posts terem likes.
+ 
+      Responda APENAS o JSON.
     `;
-
+ 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { 
-          role: "system", 
-          content: "Você é um assistente especializado em inteligência de mercado para Instagram. Você sempre responde em JSON." 
-        },
+        { role: "system", content: "Você é um analista de marketing que responde apenas em JSON." },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" }
