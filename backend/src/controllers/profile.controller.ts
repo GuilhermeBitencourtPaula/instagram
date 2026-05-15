@@ -20,6 +20,11 @@ export const getProfiles = async (req: Request, res: Response) => {
         }
       },
       include: {
+        posts: {
+          select: { permalink: true },
+          orderBy: { postedAt: 'desc' },
+          take: 1
+        },
         _count: {
           select: { posts: true }
         }

@@ -17,6 +17,7 @@ interface Profile {
   postsCount: number;
   isVerified: boolean;
   profilePicUrl: string | null;
+  posts: { permalink: string | null }[];
   _count: {
     posts: number;
   };
@@ -179,13 +180,25 @@ export default function ProfilesPage() {
                         </div>
                       ))}
                    </div>
-                   <button 
-                     onClick={() => handleAnalyze(profile.id)}
-                     disabled={isSyncing === profile.id}
-                     className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2 disabled:opacity-50"
-                   >
-                      {isSyncing === profile.id ? 'Sincronizando...' : 'Analisar Perfil'} <LayoutDashboard className="w-3 h-3" />
-                   </button>
+                   <div className="flex items-center gap-4">
+                     {profile.posts?.[0]?.permalink && (
+                       <a 
+                         href={profile.posts[0].permalink}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline flex items-center gap-1"
+                       >
+                         Ver no Instagram
+                       </a>
+                     )}
+                     <button 
+                       onClick={() => handleAnalyze(profile.id)}
+                       disabled={isSyncing === profile.id}
+                       className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2 disabled:opacity-50"
+                     >
+                        {isSyncing === profile.id ? 'Sincronizando...' : 'Analisar Perfil'} <LayoutDashboard className="w-3 h-3" />
+                     </button>
+                   </div>
                 </div>
               </motion.div>
             ))}
