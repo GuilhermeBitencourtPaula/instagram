@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { InstagramIcon as Instagram } from "@/components/ui/InstagramIcon";
+import { useRouter } from "next/navigation";
 
 interface Profile {
   id: number;
@@ -29,6 +30,7 @@ export default function ProfilesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     fetchProfiles();
