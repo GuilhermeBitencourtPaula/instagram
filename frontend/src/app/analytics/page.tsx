@@ -96,7 +96,7 @@ function AnalyticsContent() {
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Seguidores Reais</p>
                   <div className="flex items-center justify-between">
                      <p className="text-3xl font-bold text-white">
-                       {stats?.followersCount ? (stats.followersCount > 999 ? (stats.followersCount/1000).toFixed(1) + 'k' : stats.followersCount) : '0'}
+                        {stats?.followersCount ? formatNumber(stats.followersCount) : '0'}
                      </p>
                      <Users className="w-5 h-5 text-blue-500 opacity-50" />
                   </div>
