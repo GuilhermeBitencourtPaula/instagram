@@ -65,6 +65,7 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
     return result;
 
   } catch (error: any) {
+    console.error('DETALHE ERRO IA:', error);
     logger.error(`Erro ao gerar insights refinados: ${error.message}`);
     return {
       summary: 'Erro ao processar insights detalhados.',

@@ -105,10 +105,17 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       await prisma.post.upsert({
         where: { instagramPostId: post.instagramPostId },
         update: {
+          searchId: search.id, // Vínculo com a pesquisa atual
           likesCount: post.likesCount,
           commentsCount: post.commentsCount,
           caption: post.caption,
-          estimatedEngage: post.estimatedEngage
+          estimatedEngage: post.estimatedEngage,
+          hashtags: {
+            connectOrCreate: cleanHashtags.map(tag => ({
+              where: { name: tag },
+              create: { name: tag }
+            }))
+          }
         },
         create: {
           searchId: search.id,
