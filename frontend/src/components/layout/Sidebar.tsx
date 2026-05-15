@@ -109,7 +109,7 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <div className="mt-8 p-4 bg-gradient-to-br from-primary/10 to-transparent rounded-2xl border border-primary/10">
+        <div className="mt-8 mb-10 p-4 bg-gradient-to-br from-primary/10 to-transparent rounded-2xl border border-primary/10">
           <p className="text-xs font-semibold text-primary mb-1">PRO PLAN</p>
           <p className="text-[10px] text-muted-foreground mb-3">Pesquisas ilimitadas ativadas.</p>
           <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
