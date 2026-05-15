@@ -60,17 +60,33 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       throw new Error(`Nenhum post encontrado para #${hashtagName}. Perfil: ${accountType}. Consigo ver seus posts? ${hasOwnPosts}`);
     }
 
-    // Map to internal structure
-    const scrapedPosts = rawPosts.map(post => ({
-      instagramPostId: post.id,
-      caption: post.caption || '',
-      mediaUrl: post.media_url || '',
-      mediaType: post.media_type,
-      likesCount: post.like_count || 0,
-      commentsCount: post.comments_count || 0,
-      postedAt: new Date(post.timestamp),
-      username: post.username || `user_${post.id}`
-    }));
+    // Map to internal structure and calculate engagement
+    let totalLikes = 0;
+    let totalComments = 0;
+
+    const scrapedPosts = rawPosts.map(post => {
+      const likes = post.like_count || 0;
+      const comments = post.comments_count || 0;
+      totalLikes += likes;
+      totalComments += comments;
+
+      // Basic engagement calculation (since we don't have follower count for third-party profiles)
+      // We use a relative engagement score
+      const engagement = likes + (comments * 2);
+
+      return {
+        instagramPostId: post.id,
+        caption: post.caption || '',
+        mediaUrl: post.media_url || '',
+        mediaType: post.media_type,
+        likesCount: likes,
+        commentsCount: comments,
+        estimatedEngage: engagement,
+        postedAt: new Date(post.timestamp),
+        username: post.username || `ig_user_${post.id.split('_')[0]}`,
+        permalink: post.permalink
+      };
+    });
 
     // 2. Save Data to Database
     for (const post of scrapedPosts) {
@@ -81,13 +97,18 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
         create: { username: post.username }
       });
 
-      // Create post
+      // Extract hashtags from caption
+      const hashtagsInCaption = post.caption.match(/#[\wÀ-ÿ]+/g) || [];
+      const cleanHashtags = [...new Set(hashtagsInCaption.map(h => h.replace('#', '').toLowerCase()))];
+
+      // Create post with hashtags
       await prisma.post.upsert({
         where: { instagramPostId: post.instagramPostId },
         update: {
           likesCount: post.likesCount,
           commentsCount: post.commentsCount,
-          caption: post.caption
+          caption: post.caption,
+          estimatedEngage: post.estimatedEngage
         },
         create: {
           searchId: search.id,
@@ -98,15 +119,36 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
           mediaType: post.mediaType,
           likesCount: post.likesCount,
           commentsCount: post.commentsCount,
-          postedAt: post.postedAt
+          estimatedEngage: post.estimatedEngage,
+          postedAt: post.postedAt,
+          hashtags: {
+            connectOrCreate: cleanHashtags.map(tag => ({
+              where: { name: tag },
+              create: { name: tag }
+            }))
+          }
         }
       });
     }
 
-    // 3. Generate AI Insights
+    // 3. Populate Analytics Table
+    const avgEngage = scrapedPosts.length > 0 ? (totalLikes + totalComments) / scrapedPosts.length : 0;
+    
+    await prisma.analytics.create({
+      data: {
+        searchId: search.id,
+        totalPosts: scrapedPosts.length,
+        totalLikes,
+        totalComments,
+        avgEngagement: avgEngage,
+        calculatedAt: new Date()
+      }
+    });
+
+    // 4. Generate AI Insights
     const insights = await generateSearchInsights(search.query, scrapedPosts);
 
-    // 4. Save Insights
+    // 5. Save Insights
     await prisma.aiInsight.create({
       data: {
         searchId: search.id,
@@ -117,11 +159,11 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       }
     });
 
-    // 5. Update Status to Completed
+    // 6. Update Status to Completed
     const updatedSearch = await prisma.search.update({
       where: { id: search.id },
       data: { status: 'COMPLETED' },
-      include: { insights: true, posts: true }
+      include: { insights: true, posts: true, analytics: true }
     });
 
     return updatedSearch;
