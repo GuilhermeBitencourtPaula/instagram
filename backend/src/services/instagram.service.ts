@@ -1,7 +1,7 @@
 import axios from 'axios';
 import logger from '../utils/logger';
 
-const FACEBOOK_GRAPH_URL = 'https://graph.facebook.com/v20.0';
+const FACEBOOK_GRAPH_URL = 'https://graph.facebook.com/v17.0';
 
 export interface InstagramMedia {
   id: string;

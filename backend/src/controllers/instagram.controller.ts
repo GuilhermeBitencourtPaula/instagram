@@ -28,7 +28,7 @@ export const getAuthUrl = async (req: Request, res: Response) => {
   
   const state = encodeURIComponent(JSON.stringify(stateObj));
 
-  const authUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=${state}`;
+  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=${state}`;
 
   res.json({ url: authUrl });
 };
@@ -76,18 +76,21 @@ export const handleCallback = async (req: Request, res: Response) => {
     const igUserId = await instagramService.getInstagramBusinessId(longToken);
     
     if (!igUserId) {
-      // DEBUG: Vamos tentar entender o que o service viu
-      const pagesResponse = await axios.get(`https://graph.facebook.com/v20.0/me/accounts`, {
-        params: { access_token: longToken },
-      });
-      const pagesFound = pagesResponse.data.data?.map((p: any) => p.name).join(', ') || 'Nenhuma';
+      // DEBUG: Verificando Permissões e Páginas
+      const [permRes, pageRes] = await Promise.all([
+        axios.get(`https://graph.facebook.com/v17.0/me/permissions`, { params: { access_token: longToken } }),
+        axios.get(`https://graph.facebook.com/v17.0/me/accounts`, { params: { access_token: longToken } })
+      ]);
+
+      const activePerms = permRes.data.data?.filter((p: any) => p.status === 'granted').map((p: any) => p.permission).join(', ');
+      const pagesFound = pageRes.data.data?.map((p: any) => p.name).join(', ') || 'Nenhuma';
 
       return res.status(400).json({ 
         message: 'Não foi possível encontrar uma conta do Instagram Business vinculada a este perfil.',
         debug_info: {
-          pages_count: pagesResponse.data.data?.length || 0,
-          pages_names: pagesFound,
-          tip: 'Certifique-se de que sua conta do Instagram é "Empresarial" e está vinculada a uma das páginas acima no painel do Facebook.'
+          granted_permissions: activePerms,
+          pages_count: pageRes.data.data?.length || 0,
+          pages_names: pagesFound
         }
       });
     }
