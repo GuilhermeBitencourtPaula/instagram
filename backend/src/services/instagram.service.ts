@@ -162,3 +162,22 @@ export const getAccountType = async (accessToken: string, instagramUserId: strin
     return 'ERRO: ' + (error.response?.data?.error?.message || error.message);
   }
 };
+
+/**
+ * Get User's Own Media (For Debug)
+ */
+export const getUserMedia = async (accessToken: string, instagramUserId: string): Promise<string> => {
+  try {
+    const response = await axios.get(`https://graph.facebook.com/v12.0/${instagramUserId}/media`, {
+      params: {
+        fields: 'id,caption',
+        access_token: accessToken,
+        limit: 1
+      },
+    });
+    const hasPosts = response.data.data?.length > 0;
+    return hasPosts ? `SIM (Encontrei ${response.data.data.length} posts seus)` : 'NÃO (Sua conta não tem posts públicos)';
+  } catch (error: any) {
+    return 'ERRO: ' + (error.response?.data?.error?.message || error.message);
+  }
+};
