@@ -55,39 +55,32 @@ export const getLongLivedToken = async (shortLivedToken: string): Promise<{ toke
  */
 export const getInstagramBusinessId = async (accessToken: string): Promise<string | null> => {
   try {
-    // 1. Get the list of pages managed by the user
-    const pagesResponse = await axios.get(`${FACEBOOK_GRAPH_URL}/me/accounts`, {
-      params: { access_token: accessToken },
+    // Busca direta e profunda: Pega o usuário e já traz as contas de Instagram das páginas em um único passo
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/me`, {
+      params: {
+        fields: 'accounts{instagram_business_account,name}',
+        access_token: accessToken,
+      },
     });
 
-    const pages = pagesResponse.data.data;
-    console.log(`Páginas encontradas: ${pages?.length || 0}`);
-
-    if (!pages || pages.length === 0) {
-      console.warn('Nenhuma página do Facebook encontrada para este usuário.');
+    const accounts = response.data.accounts?.data;
+    
+    if (!accounts || accounts.length === 0) {
+      console.warn('O Facebook retornou zero páginas (accounts) para este token.');
       return null;
     }
 
-    // 2. For each page, check if there's a connected Instagram Business Account
-    for (const page of pages) {
-      console.log(`Verificando página: ${page.name} (${page.id})`);
-      const igResponse = await axios.get(`${FACEBOOK_GRAPH_URL}/${page.id}`, {
-        params: {
-          fields: 'instagram_business_account,name',
-          access_token: accessToken,
-        },
-      });
-
-      if (igResponse.data.instagram_business_account) {
-        console.log(`Instagram Business encontrado na página ${page.name}:`, igResponse.data.instagram_business_account.id);
-        return igResponse.data.instagram_business_account.id;
+    for (const page of accounts) {
+      if (page.instagram_business_account) {
+        console.log(`Sucesso! Instagram Business encontrado via busca profunda na página: ${page.name}`);
+        return page.instagram_business_account.id;
       }
     }
 
-    console.warn('Nenhuma das páginas encontradas possui um Instagram Business vinculado.');
+    console.warn('Páginas encontradas, mas nenhuma tem um Instagram Business vinculado na resposta do Facebook.');
     return null;
   } catch (error: any) {
-    logger.error(`Error fetching Instagram Business ID: ${error.response?.data?.error?.message || error.message}`);
+    logger.error(`Erro na busca profunda de Instagram Business: ${error.response?.data?.error?.message || error.message}`);
     return null;
   }
 };
