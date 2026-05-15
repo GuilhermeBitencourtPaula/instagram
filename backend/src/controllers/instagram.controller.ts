@@ -76,10 +76,11 @@ export const handleCallback = async (req: Request, res: Response) => {
     const igUserId = await instagramService.getInstagramBusinessId(longToken);
     
     if (!igUserId) {
-      // DEBUG: Verificando Permissões e Páginas
-      const [permRes, pageRes] = await Promise.all([
+      // DEBUG: Verificando Permissões, Páginas e Identidade do App
+      const [permRes, pageRes, appRes] = await Promise.all([
         axios.get(`https://graph.facebook.com/v17.0/me/permissions`, { params: { access_token: longToken } }),
-        axios.get(`https://graph.facebook.com/v17.0/me/accounts`, { params: { access_token: longToken } })
+        axios.get(`https://graph.facebook.com/v17.0/me/accounts`, { params: { access_token: longToken } }),
+        axios.get(`https://graph.facebook.com/v17.0/app`, { params: { access_token: longToken } })
       ]);
 
       const activePerms = permRes.data.data?.filter((p: any) => p.status === 'granted').map((p: any) => p.permission).join(', ');
@@ -88,6 +89,8 @@ export const handleCallback = async (req: Request, res: Response) => {
       return res.status(400).json({ 
         message: 'Não foi possível encontrar uma conta do Instagram Business vinculada a este perfil.',
         debug_info: {
+          app_id_in_token: appRes.data.id,
+          app_id_configured: process.env.INSTAGRAM_APP_ID,
           granted_permissions: activePerms,
           pages_count: pageRes.data.data?.length || 0,
           pages_names: pagesFound
