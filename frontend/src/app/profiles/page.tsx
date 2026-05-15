@@ -68,6 +68,12 @@ export default function ProfilesPage() {
     p.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+    return num.toString();
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto space-y-12 pb-20">
@@ -116,95 +122,94 @@ export default function ProfilesPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.05 }}
                 whileHover={{ y: -8 }}
-                className="group relative bg-card/20 backdrop-blur-xl border border-white/5 rounded-[3rem] p-8 hover:border-primary/20 transition-all duration-500 overflow-hidden"
+                className="group relative bg-[#0d0d12]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 hover:border-primary/30 transition-all duration-500 overflow-hidden"
               >
-                {/* Efeito de brilho de fundo */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/10 to-transparent blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                {/* Efeito de brilho de fundo dinâmico */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
-                <div className="flex items-center gap-5 mb-10 relative z-10">
+                <div className="flex items-center gap-6 mb-10 relative z-10">
                   <div className="relative">
-                    <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-tr from-primary/20 via-primary/5 to-transparent p-0.5 border border-white/5 group-hover:border-primary/30 transition-colors">
-                      <div className="w-full h-full rounded-[1.8rem] bg-card overflow-hidden flex items-center justify-center shadow-inner">
+                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent p-px group-hover:from-primary/50 transition-colors">
+                      <div className="w-full h-full rounded-3xl bg-[#0a0a0f] overflow-hidden flex items-center justify-center shadow-2xl">
                         {profile.profilePicUrl ? (
                           <img src={profile.profilePicUrl} alt={profile.username} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                         ) : (
-                          <div className="text-3xl grayscale group-hover:grayscale-0 transition-all duration-500">📸</div>
+                          <div className="text-3xl grayscale opacity-50">📸</div>
                         )}
                       </div>
                     </div>
                     {profile.isVerified && (
-                      <div className="absolute -bottom-1 -right-1 bg-blue-500 p-1.5 rounded-full border-4 border-[#0a0a0a] shadow-xl">
+                      <div className="absolute -bottom-1 -right-1 bg-blue-500 p-1.5 rounded-full border-4 border-[#0d0d12] shadow-xl">
                         <UserCheck className="w-3 h-3 text-white" />
                       </div>
                     )}
                     {isSyncing === profile.id && (
-                      <div className="absolute inset-0 bg-black/60 rounded-[2rem] flex items-center justify-center z-20">
+                      <div className="absolute inset-0 bg-black/60 rounded-3xl flex items-center justify-center z-20 backdrop-blur-sm">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                       </div>
                     )}
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="font-black text-xl text-white flex items-center gap-2 tracking-tighter group-hover:text-primary transition-colors">
-                      @{profile.username.startsWith('ig_user_') ? 'Perfil Mascarado' : (profile.username.length > 15 ? profile.username.substring(0, 12) + '...' : profile.username)}
+                  <div className="space-y-1 overflow-hidden">
+                    <h3 className="font-bold text-xl text-white truncate flex items-center gap-2 tracking-tighter group-hover:text-primary transition-colors">
+                      @{profile.username.startsWith('ig_user_') ? 'Analisando...' : profile.username}
                     </h3>
-                    {profile.username.startsWith('ig_user_') ? (
-                      <p className="text-[9px] font-bold text-rose-500/80 uppercase tracking-wider flex items-center gap-1">
-                        Sincronização Pendente
-                      </p>
-                    ) : (
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
-                        {profile.fullName || 'INSTAGRAM USER'}
-                      </p>
-                    )}
+                    <div className="flex items-center gap-2">
+                       {profile.username.startsWith('ig_user_') ? (
+                         <div className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded-md">
+                            <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest">Aguardando Sinc.</p>
+                         </div>
+                       ) : (
+                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-40 truncate">
+                           {profile.fullName || 'Instagram Business'}
+                         </p>
+                       )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 relative z-10">
+                <div className="grid grid-cols-3 gap-2 relative z-10">
                   {[
-                    { label: 'Posts', value: profile._count?.posts || 0, color: 'from-purple-500/20' },
-                    { label: 'Seguidores', value: profile.followersCount > 0 ? (profile.followersCount >= 1000 ? `${(profile.followersCount/1000).toFixed(1)}k` : profile.followersCount) : '--', color: 'from-blue-500/20' },
-                    { label: 'Engaj.', value: profile.followersCount > 0 ? (Math.random() * 5 + 2).toFixed(1) + '%' : '--%', color: 'from-rose-500/20', isPrimary: true }
+                    { label: 'Posts', value: profile._count?.posts || 0 },
+                    { label: 'Seguidores', value: profile.followersCount > 0 ? formatNumber(profile.followersCount) : '--' },
+                    { label: 'Engaj.', value: profile.followersCount > 0 ? (Math.random() * 5 + 2).toFixed(1) + '%' : '--%', isPrimary: true }
                   ].map((stat, idx) => (
-                    <div key={idx} className={cn(
-                      "bg-white/[0.02] border border-white/5 p-4 rounded-[2rem] text-center transition-all group-hover:bg-white/[0.04]",
-                      "hover:border-white/10"
-                    )}>
-                      <p className="text-[8px] font-black text-muted-foreground mb-1.5 uppercase tracking-widest opacity-40">{stat.label}</p>
+                    <div key={idx} className="bg-white/[0.03] border border-white/5 p-4 rounded-3xl text-center transition-all group-hover:bg-white/[0.06] group-hover:border-white/10">
+                      <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-tighter opacity-40 leading-none">{stat.label}</p>
                       <p className={cn(
-                        "font-black text-lg tracking-tighter",
+                        "font-black text-lg tracking-tight leading-none",
                         stat.isPrimary ? "text-primary" : "text-white"
                       )}>{stat.value}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between relative z-10">
-                   <div className="flex -space-x-2">
-                      {[1,2,3].map(j => (
-                        <div key={j} className="w-6 h-6 rounded-full border-2 border-[#0a0a0a] bg-white/5 overflow-hidden">
-                           <div className="w-full h-full bg-gradient-to-br from-primary/10 to-transparent" />
-                        </div>
-                      ))}
-                   </div>
-                   <div className="flex items-center gap-4">
-                     {profile.posts?.[0]?.permalink && (
-                       <a 
-                         href={profile.posts[0].permalink}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline flex items-center gap-1"
-                       >
-                         Ver no Instagram
-                       </a>
-                     )}
-                     <button 
-                       onClick={() => handleAnalyze(profile.id)}
-                       disabled={isSyncing === profile.id}
-                       className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2 disabled:opacity-50"
+                <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between relative z-10">
+                   {profile.posts?.[0]?.permalink ? (
+                     <a 
+                       href={profile.posts[0].permalink}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="text-[10px] font-bold text-muted-foreground hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2"
                      >
-                        {isSyncing === profile.id ? 'Sincronizando...' : 'Analisar Perfil'} <LayoutDashboard className="w-3 h-3" />
-                     </button>
-                   </div>
+                       <Instagram className="w-3.5 h-3.5" /> Link Direto
+                     </a>
+                   ) : (
+                     <div className="w-10" />
+                   )}
+                   
+                   <button 
+                     onClick={() => handleAnalyze(profile.id)}
+                     disabled={isSyncing === profile.id}
+                     className={cn(
+                       "text-[10px] font-black uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-xl transition-all",
+                       profile.username.startsWith('ig_user_') 
+                        ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                        : "text-muted-foreground hover:text-primary"
+                     )}
+                   >
+                      {isSyncing === profile.id ? '...' : (profile.username.startsWith('ig_user_') ? 'Resgatar' : 'Analisar')} 
+                      <LayoutDashboard className="w-3 h-3" />
+                   </button>
                 </div>
               </motion.div>
             ))}
