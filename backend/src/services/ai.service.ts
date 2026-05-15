@@ -52,8 +52,9 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
         { role: "system", content: "Você é um especialista em marketing digital. Responda apenas JSON puro." },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_object" },
-      timeout: 25000 // 25 segundos de limite
+      response_format: { type: "json_object" }
+    }, {
+      timeout: 25000 // 25 segundos de limite no segundo argumento
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
