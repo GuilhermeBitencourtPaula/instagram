@@ -105,15 +105,35 @@ export default function AnalyticsPage() {
                  </h3>
                  
                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative z-10">
-                    {stats?.mediaDistribution?.map((item, i) => (
-                      <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/5 text-center space-y-4">
-                         <p className="text-xs font-bold text-muted-foreground uppercase">{item.type}</p>
-                         <div className="text-4xl font-bold text-white">{item.percentage}</div>
-                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: item.percentage }} />
-                         </div>
-                      </div>
-                    ))}
+                    {stats?.mediaDistribution?.map((item, i) => {
+                      const labelMap: Record<string, { label: string, color: string, icon: any }> = {
+                        'CAROUSEL_ALBUM': { label: 'Carrossel', color: 'from-purple-500 to-indigo-600', icon: LayoutDashboard },
+                        'IMAGE': { label: 'Fotos', color: 'from-blue-400 to-cyan-500', icon: Camera },
+                        'VIDEO': { label: 'Vídeos', color: 'from-pink-500 to-rose-600', icon: Zap }
+                      };
+                      
+                      const info = labelMap[item.type] || { label: item.type, color: 'from-primary to-secondary', icon: FileText };
+                      const Icon = info.icon;
+
+                      return (
+                        <motion.div 
+                          key={i} 
+                          whileHover={{ y: -5 }}
+                          className="p-6 bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/5 text-center space-y-4 hover:border-white/20 transition-all"
+                        >
+                           <div className={cn("w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-gradient-to-br shadow-lg", info.color)}>
+                              <Icon className="w-6 h-6 text-white" />
+                           </div>
+                           <div className="space-y-1">
+                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{info.label}</p>
+                              <div className="text-4xl font-black text-white tracking-tighter">{item.percentage}</div>
+                           </div>
+                           <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                              <div className={cn("h-full bg-gradient-to-r", info.color)} style={{ width: item.percentage }} />
+                           </div>
+                        </motion.div>
+                      );
+                    })}
                     {(!stats?.mediaDistribution || stats.mediaDistribution.length === 0) && (
                       <p className="col-span-3 text-center text-muted-foreground py-20">Faça sua primeira pesquisa para ver as porcentagens reais.</p>
                     )}
