@@ -18,18 +18,28 @@ interface Stats {
   topTags: { name: string; count: number }[];
 }
 
-export default function AnalyticsPage() {
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function AnalyticsContent() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const profileFilter = searchParams.get("profile");
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [profileFilter]);
 
   const fetchStats = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get("/searches/stats");
+      // Passar o perfil como query param para o backend filtrar
+      const url = profileFilter 
+        ? `/searches/stats?username=${profileFilter.replace('@', '')}` 
+        : "/searches/stats";
+        
+      const response = await api.get(url);
       setStats(response.data);
     } catch (error) {
       console.error(error);
@@ -45,9 +55,13 @@ export default function AnalyticsPage() {
         <header>
           <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
             <BarChart3 className="w-8 h-8 text-primary" />
-            Analíticos Avançados
+            {profileFilter ? `Analíticos: @${profileFilter.replace('@', '')}` : 'Analíticos Avançados'}
           </h1>
-          <p className="text-muted-foreground mt-2">Visão geral de performance e crescimento de nichos coletados.</p>
+          <p className="text-muted-foreground mt-2">
+            {profileFilter 
+              ? `Visão detalhada de performance para o perfil selecionado.` 
+              : 'Visão geral de performance e crescimento de nichos coletados.'}
+          </p>
         </header>
 
         {isLoading ? (
@@ -200,5 +214,20 @@ export default function AnalyticsPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center py-20">
+           <Loader2 className="w-12 h-12 text-primary animate-spin" />
+           <p className="text-muted-foreground mt-4">Carregando painel de inteligência...</p>
+        </div>
+      </DashboardLayout>
+    }>
+      <AnalyticsContent />
+    </Suspense>
   );
 }

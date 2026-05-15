@@ -47,7 +47,7 @@ export default function ProfilesPage() {
     }
   };
 
-  const handleAnalyze = async (profileId: number) => {
+  const handleAnalyze = async (profileId: number, username: string) => {
     try {
       setIsSyncing(profileId);
       const response = await api.post(`/profiles/${profileId}/sync`);
@@ -56,6 +56,9 @@ export default function ProfilesPage() {
       setProfiles(prev => prev.map(p => p.id === profileId ? response.data : p));
       
       toast.success("Perfil sincronizado com dados reais!");
+
+      // Redirecionar para os analíticos detalhados deste perfil
+      router.push(`/analytics?profile=${username}`);
     } catch (error: any) {
       console.error(error);
       toast.error(error.response?.data?.message || "Erro ao sincronizar perfil.");
@@ -209,7 +212,7 @@ export default function ProfilesPage() {
                    )}
                    
                    <button 
-                     onClick={() => handleAnalyze(profile.id)}
+                     onClick={() => handleAnalyze(profile.id, profile.username)}
                      disabled={isSyncing === profile.id}
                      className={cn(
                        "text-[10px] font-black uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-xl transition-all",
