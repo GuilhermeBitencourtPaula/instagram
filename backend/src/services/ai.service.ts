@@ -65,14 +65,20 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
     console.error('DETALHE ERRO IA:', error);
     logger.error(`Erro ao gerar insights refinados: ${error.message}`);
     
-    // Retornamos o erro real para o usuário conseguir debugar no painel
-    const errorMsg = error.response?.data?.error?.message || error.message || 'Erro desconhecido';
+    let friendlyMsg = 'Ocorreu um erro ao processar os insights da IA.';
+    
+    // Detecta erro de saldo/cota (429)
+    if (error.message?.includes('429') || error.response?.data?.error?.code === 'insufficient_quota') {
+      friendlyMsg = 'Sua conta OpenAI está sem saldo ou atingiu o limite de uso. Adicione créditos em platform.openai.com para ativar esta função.';
+    } else if (error.message?.includes('401') || error.response?.data?.error?.code === 'invalid_api_key') {
+      friendlyMsg = 'Sua chave da OpenAI parece inválida. Verifique as configurações no painel do Railway.';
+    }
     
     return {
-      summary: `Erro na IA: ${errorMsg}. Verifique sua chave e saldo na OpenAI.`,
-      detectedTrends: 'Verifique Logs',
-      suggestedNiche: 'Verifique Logs',
-      viralPatterns: 'Verifique Logs',
+      summary: friendlyMsg,
+      detectedTrends: 'Indisponível',
+      suggestedNiche: 'Indisponível',
+      viralPatterns: 'Indisponível',
     };
   }
 };
