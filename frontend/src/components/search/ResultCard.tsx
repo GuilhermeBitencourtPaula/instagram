@@ -68,7 +68,7 @@ export default function ResultCard({ post }: { post: Post }) {
         <div className="flex items-center gap-2">
            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary to-secondary" />
            <span className="text-xs font-bold text-white truncate max-w-[150px]">
-             @{post.username.replace('ig_user_', '')}
+             @{post.username ? post.username.replace('ig_user_', '') : 'user'}
            </span>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
@@ -76,7 +76,7 @@ export default function ResultCard({ post }: { post: Post }) {
         </p>
         <div className="pt-2 flex items-center justify-between border-t border-white/5">
            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-             {new Date(post.postedAt).toLocaleDateString('pt-BR')}
+             {post.postedAt ? new Date(post.postedAt).toLocaleDateString('pt-BR') : 'Data indisponível'}
            </span>
            <button className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest flex items-center gap-1">
               Ver Detalhes <Share2 className="w-3 h-3" />
