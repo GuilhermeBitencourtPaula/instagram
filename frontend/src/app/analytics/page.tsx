@@ -6,6 +6,7 @@ import { BarChart3, TrendingUp, Users, PieChart, Loader2, Search, FileText, Zap,
 import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Stats {
   totalSearches: number;
