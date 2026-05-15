@@ -153,12 +153,12 @@ export const getAccountType = async (accessToken: string, instagramUserId: strin
   try {
     const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
       params: {
-        fields: 'account_type,username',
+        fields: 'id,username',
         access_token: accessToken,
       },
     });
-    return response.data.account_type || 'UNKNOWN';
+    return `ID: ${response.data.id}, Username: ${response.data.username}`;
   } catch (error: any) {
-    return 'ERROR: ' + (error.response?.data?.error?.message || error.message);
+    return 'ERRO: ' + (error.response?.data?.error?.message || error.message);
   }
 };
