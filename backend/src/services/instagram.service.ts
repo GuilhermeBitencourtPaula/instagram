@@ -109,7 +109,7 @@ export const getInstagramBusinessId = async (accessToken: string): Promise<strin
  */
 export const getHashtagId = async (accessToken: string, instagramUserId: string, hashtagName: string): Promise<string | null> => {
   try {
-    const response = await axios.get(`https://graph.facebook.com/v12.0/ig_hashtag_search`, {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/ig_hashtag_search`, {
       params: {
         user_id: instagramUserId,
         q: hashtagName,
@@ -131,7 +131,7 @@ export const getHashtagId = async (accessToken: string, instagramUserId: string,
 export const getHashtagMedia = async (accessToken: string, instagramUserId: string, hashtagId: string, type: 'recent' | 'top' = 'recent'): Promise<InstagramMedia[]> => {
   try {
     const endpoint = type === 'recent' ? 'recent_media' : 'top_media';
-    const response = await axios.get(`https://graph.facebook.com/v12.0/${hashtagId}/${endpoint}`, {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${hashtagId}/${endpoint}`, {
       params: {
         user_id: instagramUserId,
         fields: 'id,caption,media_url,media_type,like_count,comments_count,timestamp,permalink,username',
@@ -141,8 +141,9 @@ export const getHashtagMedia = async (accessToken: string, instagramUserId: stri
 
     return response.data.data || [];
   } catch (error: any) {
-    logger.error(`Error fetching media for hashtag ${hashtagId}: ${error.response?.data?.error?.message || error.message}`);
-    return [];
+    const errorMsg = error.response?.data?.error?.message || error.message;
+    logger.error(`Error fetching media for hashtag ${hashtagId}: ${errorMsg}`);
+    throw new Error(`Erro do Instagram (Hashtag Media): ${errorMsg}`);
   }
 };
 
@@ -151,13 +152,13 @@ export const getHashtagMedia = async (accessToken: string, instagramUserId: stri
  */
 export const getAccountType = async (accessToken: string, instagramUserId: string): Promise<string> => {
   try {
-    const response = await axios.get(`https://graph.facebook.com/v12.0/${instagramUserId}`, {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
       params: {
-        fields: 'id,username,media_count',
+        fields: 'id,username,media_count,account_type',
         access_token: accessToken,
       },
     });
-    return `ID: ${response.data.id}, Username: ${response.data.username}, Posts: ${response.data.media_count}`;
+    return `ID: ${response.data.id}, User: ${response.data.username}, Tipo: ${response.data.account_type}, Posts: ${response.data.media_count}`;
   } catch (error: any) {
     return 'ERRO: ' + (error.response?.data?.error?.message || error.message);
   }
@@ -168,7 +169,7 @@ export const getAccountType = async (accessToken: string, instagramUserId: strin
  */
 export const getUserMedia = async (accessToken: string, instagramUserId: string): Promise<string> => {
   try {
-    const response = await axios.get(`https://graph.facebook.com/v12.0/${instagramUserId}/media`, {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}/media`, {
       params: {
         fields: 'id,caption',
         access_token: accessToken,
