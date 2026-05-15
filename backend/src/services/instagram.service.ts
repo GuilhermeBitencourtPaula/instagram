@@ -109,7 +109,7 @@ export const getInstagramBusinessId = async (accessToken: string): Promise<strin
  */
 export const getHashtagId = async (accessToken: string, instagramUserId: string, hashtagName: string): Promise<string | null> => {
   try {
-    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/ig_hashtag_search`, {
+    const response = await axios.get(`https://graph.facebook.com/v12.0/ig_hashtag_search`, {
       params: {
         user_id: instagramUserId,
         q: hashtagName,
@@ -131,7 +131,7 @@ export const getHashtagId = async (accessToken: string, instagramUserId: string,
 export const getHashtagMedia = async (accessToken: string, instagramUserId: string, hashtagId: string, type: 'recent' | 'top' = 'recent'): Promise<InstagramMedia[]> => {
   try {
     const endpoint = type === 'recent' ? 'recent_media' : 'top_media';
-    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${hashtagId}/${endpoint}`, {
+    const response = await axios.get(`https://graph.facebook.com/v12.0/${hashtagId}/${endpoint}`, {
       params: {
         user_id: instagramUserId,
         fields: 'id,caption,media_url,media_type,like_count,comments_count,timestamp,permalink,username',
