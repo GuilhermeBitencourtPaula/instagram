@@ -2,7 +2,8 @@
 
 import Sidebar from "./Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function DashboardLayout({
   children,
@@ -10,6 +11,19 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsAuth(true);
+    }
+  }, [router]);
+
+  if (!isAuth) return null;
 
   return (
     <div className="flex bg-[#09090b] min-h-screen text-white selection:bg-primary/30">

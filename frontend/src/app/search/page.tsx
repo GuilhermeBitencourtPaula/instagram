@@ -28,7 +28,13 @@ import ResultCard from "@/components/search/ResultCard";
 import AiInsightsCard from "@/components/analytics/AiInsightsCard";
 import Link from "next/link";
 
+import { useRouter, useSearchParams } from "next/navigation";
+
 export default function SearchPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchIdFromUrl = searchParams.get("id");
+
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<any>(null);
@@ -50,6 +56,32 @@ export default function SearchPage() {
     checkConnection();
   }, []);
 
+  // AUTO-LOAD if ID is in URL
+  useEffect(() => {
+    if (searchIdFromUrl && !results) {
+      const loadSearch = async () => {
+        setIsSearching(true);
+        try {
+          const res = await api.get(`/searches/${searchIdFromUrl}`);
+          // Note: If the search exists but isn't processed, we might need to handle that.
+          // For now, assume it's processed or we just show what we have.
+          setResults(res.data);
+          // Also fetch insights if they exist
+          if (res.data.insights?.length > 0) {
+            setAiInsight(res.data.insights[0]);
+          }
+        } catch (error) {
+          console.error("Erro ao carregar pesquisa da URL:", error);
+          toast.error("Não foi possível carregar esta pesquisa.");
+          router.push("/search");
+        } finally {
+          setIsSearching(false);
+        }
+      };
+      loadSearch();
+    }
+  }, [searchIdFromUrl, router]);
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim() || !isConnected) return;
@@ -67,6 +99,9 @@ export default function SearchPage() {
       
       setResults(processResponse.data.search);
       setIsFavorite(false);
+
+      // Sincronizar URL para persistência
+      router.push(`/search?id=${searchId}`);
 
       // 2. Tentar gerar insights de IA avançados via Instagram API
       try {
@@ -112,6 +147,7 @@ export default function SearchPage() {
     setResults(null);
     setAiInsight(null);
     setQuery("");
+    router.push("/search");
   };
 
   const showSearchTip = () => {
