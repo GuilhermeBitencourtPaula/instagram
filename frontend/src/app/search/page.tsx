@@ -289,7 +289,7 @@ export default function SearchPage() {
                 O que vamos <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">descobrir</span> hoje?
               </h1>
               <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                Digite um nicho, marca ou palavra-chave e nossa IA coletará e analisará as maiores tendências do Instagram para você.
+                Digite um nicho ou use <span className="text-primary font-bold">@perfil</span> para analisar uma conta específica e nossa IA coletará as maiores tendências para você.
               </p>
             </motion.div>
 
@@ -299,14 +299,14 @@ export default function SearchPage() {
                 <div className="relative flex items-center bg-card/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2 pr-4 shadow-2xl">
                   <div className="flex-1 flex items-center px-4 md:px-6">
                     <SearchIcon className="w-6 h-6 text-muted-foreground mr-4" />
-                    <input
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Ex: Moda Sustentável, Dropshipping de Relógios..."
-                      className="w-full bg-transparent border-none text-lg md:text-xl text-white placeholder:text-muted-foreground/50 focus:ring-0 outline-none py-4"
-                      disabled={isSearching}
-                    />
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Ex: @nike, #moda, @anitta..."
+                        className="w-full bg-transparent border-none text-lg md:text-xl text-white placeholder:text-muted-foreground/50 focus:ring-0 outline-none py-4"
+                        disabled={isSearching}
+                      />
                   </div>
                   <Button 
                     type="submit" 

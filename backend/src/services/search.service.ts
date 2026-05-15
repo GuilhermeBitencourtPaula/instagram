@@ -30,34 +30,50 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
 
     // 1. Fetch Data from Instagram Graph API
     const instagramUserId = config.instagramUserId;
+    const isProfileSearch = search.query.startsWith('@');
     const hashtagName = search.query.replace('#', '').trim();
+    const profileName = search.query.replace('@', '').trim();
 
-    console.log(`[SEARCH] Iniciando busca. Instagram ID: ${instagramUserId}, Hashtag: ${hashtagName}`);
-    logger.info(`Agente IA: Iniciando busca real no Instagram para: #${hashtagName}`);
+    logger.info(`Agente IA: Iniciando busca ${isProfileSearch ? 'de perfil' : 'de hashtag'} no Instagram para: ${search.query}`);
 
-    // Get Hashtag ID
-    const hashtagId = await instagramService.getHashtagId(config.accessToken, instagramUserId, hashtagName);
+    let rawPosts: any[] = [];
+    let profileData: any = null;
 
-    if (!hashtagId) {
-      await prisma.search.update({
-        where: { id: search.id },
-        data: { status: 'FAILED' }
-      });
-      throw new Error(`Hashtag #${hashtagName} não encontrada ou erro na API.`);
+    if (isProfileSearch) {
+      // --- PROFILE SEARCH FLOW ---
+      profileData = await instagramService.getBusinessDiscovery(config.accessToken, instagramUserId, profileName);
+      
+      if (!profileData) {
+        throw new Error(`Perfil @${profileName} não encontrado ou não é uma conta Comercial/Criador.`);
+      }
+
+      // Business Discovery returns media inside the data if requested
+      // We need to re-fetch with media if they aren't there or use the data
+      // Actually, let's fetch media specifically for this profile
+      const response = await instagramService.getBusinessDiscoveryWithMedia(config.accessToken, instagramUserId, profileName);
+      rawPosts = response?.media?.data || [];
+    } else {
+      // --- HASHTAG SEARCH FLOW ---
+      const hashtagId = await instagramService.getHashtagId(config.accessToken, instagramUserId, hashtagName);
+
+      if (!hashtagId) {
+        await prisma.search.update({
+          where: { id: search.id },
+          data: { status: 'FAILED' }
+        });
+        throw new Error(`Hashtag #${hashtagName} não encontrada ou erro na API.`);
+      }
+
+      rawPosts = await instagramService.getHashtagMedia(config.accessToken, instagramUserId, hashtagId, 'top');
     }
 
-    // Get Media (Mudamos para 'top' para garantir que tragamos posts com conteúdo relevante)
-    const rawPosts = await instagramService.getHashtagMedia(config.accessToken, instagramUserId, hashtagId, 'top');
-
-    if (rawPosts.length === 0) {
+    if (rawPosts.length === 0 && !isProfileSearch) {
       const accountType = await instagramService.getAccountType(config.accessToken, instagramUserId);
-      const hasOwnPosts = await instagramService.getUserMedia(config.accessToken, instagramUserId);
-      
       await prisma.search.update({
         where: { id: search.id },
         data: { status: 'FAILED' }
       });
-      throw new Error(`Nenhum post encontrado para #${hashtagName}. Perfil: ${accountType}. Consigo ver seus posts? ${hasOwnPosts}`);
+      throw new Error(`Nenhum post encontrado para ${search.query}. Perfil: ${accountType}.`);
     }
 
     // Map to internal structure and calculate engagement
@@ -72,20 +88,18 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       totalComments += comments;
 
       const engagement = likes + (comments * 2);
-      let realUsername = post.username || `ig_user_${post.id.split('_')[0]}`;
+      let realUsername = isProfileSearch ? profileName : (post.username || `ig_user_${post.id.split('_')[0]}`);
 
-      // --- NEW: PROACTIVE RESCUE ---
-      // If we have a masked username and a permalink, try to rescue it NOW
-      if (realUsername.startsWith('ig_user_') && post.permalink) {
+      // --- RESCUE (Only for hashtags) ---
+      if (!isProfileSearch && realUsername.startsWith('ig_user_') && post.permalink) {
         try {
-          const oembed = await instagramService.getOEmbedInfo(config.accessToken, post.permalink);
-          if (oembed && oembed.author_name) {
-            realUsername = oembed.author_name;
-            logger.info(`Username resgatado proativamente: ${realUsername}`);
+          if (scrapedPosts.length < 5) {
+            const oembed = await instagramService.getOEmbedInfo(config.accessToken, post.permalink);
+            if (oembed && oembed.author_name) {
+              realUsername = oembed.author_name;
+            }
           }
-        } catch (e) {
-          // Silent fail, use masked
-        }
+        } catch (e) {}
       }
 
       scrapedPosts.push({
@@ -107,8 +121,17 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       // Find or create profile
       const profile = await prisma.instagramProfile.upsert({
         where: { username: post.username },
-        update: {},
-        create: { username: post.username }
+        update: isProfileSearch && profileData ? {
+          fullName: profileData.name,
+          followersCount: profileData.followers_count,
+          profilePicUrl: profileData.profile_picture_url
+        } : {},
+        create: { 
+          username: post.username,
+          fullName: isProfileSearch ? profileData?.name : null,
+          followersCount: isProfileSearch ? profileData?.followers_count : 0,
+          profilePicUrl: isProfileSearch ? profileData?.profile_picture_url : null
+        }
       });
 
       // Extract hashtags from caption

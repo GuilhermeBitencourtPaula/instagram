@@ -218,6 +218,25 @@ export const getBusinessDiscovery = async (accessToken: string, instagramUserId:
     return null;
   }
 };
+
+/**
+ * Get Business Discovery with Media (Followers + Posts)
+ */
+export const getBusinessDiscoveryWithMedia = async (accessToken: string, instagramUserId: string, targetUsername: string) => {
+  try {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
+      params: {
+        fields: `business_discovery.username(${targetUsername}){followers_count,media_count,name,username,biography,profile_picture_url,media{id,caption,media_url,media_type,like_count,comments_count,timestamp,permalink}}`,
+        access_token: accessToken,
+      },
+    });
+
+    return response.data.business_discovery;
+  } catch (error: any) {
+    logger.error(`Erro no Business Discovery with Media para ${targetUsername}: ${error.response?.data?.error?.message || error.message}`);
+    return null;
+  }
+};
 /**
  * Get OEmbed Info (Author Name, etc from permalink)
  */
