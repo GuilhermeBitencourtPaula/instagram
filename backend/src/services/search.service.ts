@@ -126,7 +126,7 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
           estimatedEngage: post.estimatedEngage,
           permalink: post.permalink,
           hashtags: {
-            connectOrCreate: cleanHashtags.map(tag => ({
+            connectOrCreate: cleanHashtags.map((tag: string) => ({
               where: { name: tag },
               create: { name: tag }
             }))
@@ -145,7 +145,7 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
           permalink: post.permalink,
           postedAt: post.postedAt,
           hashtags: {
-            connectOrCreate: cleanHashtags.map(tag => ({
+            connectOrCreate: cleanHashtags.map((tag: string) => ({
               where: { name: tag },
               create: { name: tag }
             }))
