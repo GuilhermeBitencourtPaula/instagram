@@ -87,6 +87,7 @@ model Post {
   commentsCount   Int              @default(0)
   estimatedEngage Float            @default(0)
   locationName    String?
+  permalink       String?          @db.Text
   postedAt        DateTime
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt

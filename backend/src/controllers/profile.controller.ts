@@ -67,7 +67,7 @@ export const syncProfile = async (req: Request, res: Response) => {
     // --- STAGE 2: Rescue Username from Permalink (OEmbed) ---
     if (!discoveryData) {
       const latestPost = await prisma.post.findFirst({
-        where: { instagramProfileId: profile.id },
+        where: { profileId: profile.id },
         orderBy: { postedAt: 'desc' }
       });
 
