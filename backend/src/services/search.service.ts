@@ -32,6 +32,7 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
     const instagramUserId = config.instagramUserId;
     const hashtagName = search.query.replace('#', '').trim();
 
+    console.log(`[SEARCH] Iniciando busca. Instagram ID: ${instagramUserId}, Hashtag: ${hashtagName}`);
     logger.info(`Agente IA: Iniciando busca real no Instagram para: #${hashtagName}`);
 
     // Get Hashtag ID
