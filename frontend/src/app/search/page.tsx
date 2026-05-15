@@ -67,6 +67,7 @@ function SearchContent() {
           // Note: If the search exists but isn't processed, we might need to handle that.
           // For now, assume it's processed or we just show what we have.
           setResults(res.data);
+          setIsFavorite(res.data.isFavorite || false);
           // Also fetch insights if they exist
           if (res.data.insights?.length > 0) {
             setAiInsight(res.data.insights[0]);
@@ -144,6 +145,13 @@ function SearchContent() {
     }
   };
 
+  const handleExport = () => {
+    toast.success("Preparando relatório para exportação...");
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+
   const resetSearch = () => {
     setResults(null);
     setAiInsight(null);
@@ -186,9 +194,12 @@ function SearchContent() {
                   <Star className={`w-4 h-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
                   {isFavorite ? 'Favoritado' : 'Favoritar'}
                </Button>
-               <Button className="rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
-                  Exportar Relatório
-               </Button>
+                <Button 
+                  onClick={handleExport}
+                  className="rounded-xl bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+                >
+                   Exportar Relatório
+                </Button>
             </div>
           </header>
 
