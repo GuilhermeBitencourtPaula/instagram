@@ -109,9 +109,11 @@ export const processSearch = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     logger.error(`Erro no processamento da pesquisa ${id}: ${error.message}`);
-    // Retorna 400 para erros conhecidos (como conta desconectada) em vez de 500
+    
+    // Retorna detalhes para o frontend debugar
     res.status(400).json({ 
       message: error.message || 'Erro ao processar pesquisa.',
+      debug: error.response?.data || error.stack,
       code: error.message.includes('não conectada') ? 'INSTAGRAM_NOT_CONNECTED' : 'PROCESS_ERROR'
     });
   }
