@@ -96,46 +96,77 @@ export default function AnalyticsPage() {
                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 bg-card/40 border border-white/5 rounded-[2rem] p-8 min-h-[400px] relative overflow-hidden">
-                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-                 <h3 className="font-bold text-white mb-8 flex items-center gap-2 relative z-10">
-                    <PieChart className="w-5 h-5 text-primary" />
-                    Distribuição de Mídia no Nicho
-                 </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="md:col-span-2 bg-card/40 border border-white/5 rounded-[2.5rem] p-10 relative overflow-hidden">
+                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+                 <div className="flex items-center justify-between mb-10 relative z-10">
+                    <h3 className="font-bold text-xl text-white flex items-center gap-3">
+                       <PieChart className="w-6 h-6 text-primary" />
+                       Distribuição de Mídia no Nicho
+                    </h3>
+                    <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-bold text-primary uppercase tracking-tighter">
+                       Dados em Tempo Real
+                    </div>
+                 </div>
                  
                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative z-10">
-                    {stats?.mediaDistribution?.map((item, i) => {
-                      const labelMap: Record<string, { label: string, color: string, icon: any }> = {
-                        'CAROUSEL_ALBUM': { label: 'Carrossel', color: 'from-purple-500 to-indigo-600', icon: LayoutDashboard },
-                        'IMAGE': { label: 'Fotos', color: 'from-blue-400 to-cyan-500', icon: Camera },
-                        'VIDEO': { label: 'Vídeos', color: 'from-pink-500 to-rose-600', icon: Zap }
+                    {(stats?.mediaDistribution || []).map((item, i) => {
+                      const labelMap: Record<string, { label: string, color: string, icon: any, shadow: string }> = {
+                        'CAROUSEL_ALBUM': { 
+                          label: 'Carrossel', 
+                          color: 'from-indigo-500 to-purple-600', 
+                          icon: LayoutDashboard,
+                          shadow: 'shadow-indigo-500/20'
+                        },
+                        'IMAGE': { 
+                          label: 'Fotos', 
+                          color: 'from-blue-400 to-cyan-500', 
+                          icon: Camera,
+                          shadow: 'shadow-blue-500/20'
+                        },
+                        'VIDEO': { 
+                          label: 'Vídeos', 
+                          color: 'from-rose-500 to-pink-600', 
+                          icon: Zap,
+                          shadow: 'shadow-rose-500/20'
+                        }
                       };
                       
-                      const info = labelMap[item.type] || { label: item.type, color: 'from-primary to-secondary', icon: FileText };
+                      const info = labelMap[item.type] || { 
+                        label: item.type, 
+                        color: 'from-primary to-secondary', 
+                        icon: FileText,
+                        shadow: 'shadow-primary/20'
+                      };
                       const Icon = info.icon;
 
                       return (
                         <motion.div 
                           key={i} 
-                          whileHover={{ y: -5 }}
-                          className="p-6 bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/5 text-center space-y-4 hover:border-white/20 transition-all"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          whileHover={{ y: -5, scale: 1.02 }}
+                          className="group p-8 bg-white/[0.03] backdrop-blur-md rounded-[3rem] border border-white/5 text-center space-y-6 hover:border-white/10 transition-all cursor-default"
                         >
-                           <div className={cn("w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-gradient-to-br shadow-lg", info.color)}>
-                              <Icon className="w-6 h-6 text-white" />
+                           <div className={cn("w-16 h-16 rounded-[1.5rem] mx-auto flex items-center justify-center bg-gradient-to-br shadow-2xl transition-transform group-hover:rotate-12", info.color, info.shadow)}>
+                              <Icon className="w-8 h-8 text-white" />
                            </div>
                            <div className="space-y-1">
-                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{info.label}</p>
-                              <div className="text-4xl font-black text-white tracking-tighter">{item.percentage}</div>
+                              <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">{info.label}</p>
+                              <div className="text-5xl font-black text-white tracking-tighter tabular-nums">{item.percentage}</div>
                            </div>
-                           <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                              <div className={cn("h-full bg-gradient-to-r", info.color)} style={{ width: item.percentage }} />
+                           <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                              <div className={cn("h-full rounded-full bg-gradient-to-r", info.color)} style={{ width: item.percentage }} />
                            </div>
                         </motion.div>
                       );
                     })}
                     {(!stats?.mediaDistribution || stats.mediaDistribution.length === 0) && (
-                      <p className="col-span-3 text-center text-muted-foreground py-20">Faça sua primeira pesquisa para ver as porcentagens reais.</p>
+                      <div className="col-span-3 text-center py-24 space-y-4 opacity-40">
+                         <Search className="w-12 h-12 mx-auto" />
+                         <p className="text-sm font-medium">Faça sua primeira pesquisa para ver as porcentagens reais.</p>
+                      </div>
                     )}
                  </div>
               </div>
