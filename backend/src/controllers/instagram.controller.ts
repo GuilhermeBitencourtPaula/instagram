@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import axios from 'axios';
 import prisma from '../database/connection';
 import logger from '../utils/logger';
 import * as instagramService from '../services/instagram.service';
@@ -75,7 +76,20 @@ export const handleCallback = async (req: Request, res: Response) => {
     const igUserId = await instagramService.getInstagramBusinessId(longToken);
     
     if (!igUserId) {
-      return res.status(400).json({ message: 'Não foi possível encontrar uma conta do Instagram Business vinculada a este perfil.' });
+      // DEBUG: Vamos tentar entender o que o service viu
+      const pagesResponse = await axios.get(`https://graph.facebook.com/v20.0/me/accounts`, {
+        params: { access_token: longToken },
+      });
+      const pagesFound = pagesResponse.data.data?.map((p: any) => p.name).join(', ') || 'Nenhuma';
+
+      return res.status(400).json({ 
+        message: 'Não foi possível encontrar uma conta do Instagram Business vinculada a este perfil.',
+        debug_info: {
+          pages_count: pagesResponse.data.data?.length || 0,
+          pages_names: pagesFound,
+          tip: 'Certifique-se de que sua conta do Instagram é "Empresarial" e está vinculada a uma das páginas acima no painel do Facebook.'
+        }
+      });
     }
 
     const expiresAt = new Date();
