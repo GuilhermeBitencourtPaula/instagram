@@ -82,6 +82,23 @@ export const deleteSearch = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteAllSearches = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  try {
+    // Soft delete all searches for the user
+    await prisma.search.updateMany({
+      where: { userId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+
+    res.status(200).json({ message: 'Todo o histórico foi removido com sucesso.' });
+  } catch (error: any) {
+    logger.error(`Erro ao deletar todo o histórico: ${error.message}`);
+    res.status(500).json({ message: 'Erro ao remover todo o histórico.' });
+  }
+};
+
 export const processSearch = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.userId;

@@ -146,7 +146,7 @@ export default function DashboardPage() {
                 <History className="w-5 h-5 text-primary" />
                 Pesquisas Recentes
               </h2>
-              <Link href="/monitoring" className="text-sm text-primary hover:underline">Ver todas</Link>
+              <Link href="/history" className="text-sm text-primary hover:underline">Ver todas</Link>
             </div>
             
             <div className="space-y-4">

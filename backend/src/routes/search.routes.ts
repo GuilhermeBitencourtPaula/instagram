@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createSearch, getUserSearches, deleteSearch, processSearch, getStats, toggleFavorite } from '../controllers/search.controller';
+import { createSearch, getUserSearches, deleteSearch, deleteAllSearches, processSearch, getStats, toggleFavorite } from '../controllers/search.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import { cacheMiddleware } from '../middlewares/cache.middleware';
 
@@ -22,6 +22,9 @@ router.get('/stats', cacheMiddleware(600), getStats);
 
 // @route DELETE /api/searches/:id
 router.delete('/:id', deleteSearch);
+
+// @route DELETE /api/searches
+router.delete('/', deleteAllSearches);
 
 // @route PATCH /api/searches/:id/favorite
 router.patch('/:id/favorite', toggleFavorite);
