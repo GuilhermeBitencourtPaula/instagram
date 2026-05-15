@@ -136,7 +136,7 @@ export const getStats = async (req: Request, res: Response) => {
       where: { search: { userId, deletedAt: null } }
     });
 
-    // Calculate average engagement (simplified)
+    // Calculate average engagement
     const avgEngage = await prisma.post.aggregate({
       where: { search: { userId, deletedAt: null } },
       _avg: {
@@ -144,32 +144,53 @@ export const getStats = async (req: Request, res: Response) => {
       }
     });
 
-    // Get Top Hashtags (Tags)
+    // Media Distribution (Percentages)
+    const mediaCounts = await prisma.post.groupBy({
+      by: ['mediaType'],
+      where: { search: { userId, deletedAt: null } },
+      _count: true
+    });
+
+    const distribution = mediaCounts.map(m => ({
+      type: m.mediaType,
+      percentage: totalPosts > 0 ? ((m._count / totalPosts) * 100).toFixed(1) + '%' : '0%'
+    }));
+
+    // Get Top Hashtags
     const topTags = await prisma.tag.findMany({
       where: {
         searches: {
-          some: {
-            userId,
-            deletedAt: null
-          }
+          some: { userId, deletedAt: null }
         }
       },
       include: {
-        _count: {
-          select: { searches: true }
-        }
+        _count: { select: { searches: true } }
       },
-      orderBy: {
-        searches: { _count: 'desc' }
-      },
+      orderBy: { searches: { _count: 'desc' } },
       take: 5
     });
+
+    // Get real followers count from connected account
+    const instagramConfig = await prisma.instagramConfig.findFirst({
+      where: { userId }
+    });
+
+    let followersCount = 0;
+    if (instagramConfig) {
+      const metrics = await instagramService.getAccountMetrics(
+        instagramConfig.accessToken,
+        instagramConfig.instagramUserId
+      );
+      if (metrics) followersCount = metrics.followers_count;
+    }
 
     res.status(200).json({
       totalSearches,
       totalPosts,
       totalInsights,
       avgEngagement: avgEngage._avg.likesCount ? (avgEngage._avg.likesCount / 100).toFixed(1) + '%' : '0%',
+      followersCount,
+      mediaDistribution: distribution,
       topTags: topTags.map((t: any) => ({ name: t.name, count: t._count.searches }))
     });
   } catch (error: any) {

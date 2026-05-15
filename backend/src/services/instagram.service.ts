@@ -182,3 +182,21 @@ export const getUserMedia = async (accessToken: string, instagramUserId: string)
     return 'ERRO: ' + (error.response?.data?.error?.message || error.message);
   }
 };
+/**
+ * Get Account Metrics (Followers, Name, etc)
+ */
+export const getAccountMetrics = async (accessToken: string, instagramUserId: string) => {
+  try {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
+      params: {
+        fields: 'followers_count,media_count,name,username',
+        access_token: accessToken,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    logger.error(`Erro ao buscar métricas da conta: ${error.message}`);
+    return null;
+  }
+};

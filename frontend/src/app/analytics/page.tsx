@@ -12,6 +12,8 @@ interface Stats {
   totalPosts: number;
   totalInsights: number;
   avgEngagement: string;
+  followersCount: number;
+  mediaDistribution: { type: string; percentage: string }[];
   topTags: { name: string; count: number }[];
 }
 
@@ -54,7 +56,7 @@ export default function AnalyticsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                <div className="bg-card/40 border border-white/5 rounded-[2rem] p-6 space-y-2">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total de Buscas</p>
                   <div className="flex items-center justify-between">
@@ -70,6 +72,15 @@ export default function AnalyticsPage() {
                   </div>
                </div>
                <div className="bg-card/40 border border-white/5 rounded-[2rem] p-6 space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Seguidores Reais</p>
+                  <div className="flex items-center justify-between">
+                     <p className="text-3xl font-bold text-white">
+                       {stats?.followersCount ? (stats.followersCount > 999 ? (stats.followersCount/1000).toFixed(1) + 'k' : stats.followersCount) : '0'}
+                     </p>
+                     <Users className="w-5 h-5 text-blue-500 opacity-50" />
+                  </div>
+               </div>
+               <div className="bg-card/40 border border-white/5 rounded-[2rem] p-6 space-y-2">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Insights de IA</p>
                   <div className="flex items-center justify-between">
                      <p className="text-3xl font-bold text-white">{stats?.totalInsights}</p>
@@ -77,7 +88,7 @@ export default function AnalyticsPage() {
                   </div>
                </div>
                <div className="bg-card/40 border border-white/5 rounded-[2rem] p-6 space-y-2">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Engajamento Médio</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Engajamento</p>
                   <div className="flex items-center justify-between">
                      <p className="text-3xl font-bold text-primary">{stats?.avgEngagement}</p>
                      <TrendingUp className="w-5 h-5 text-primary opacity-50" />
@@ -86,11 +97,26 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 bg-card/40 border border-white/5 rounded-[2rem] p-8 h-[400px] flex items-center justify-center relative overflow-hidden group">
-                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent group-hover:from-primary/10 transition-colors" />
-                 <div className="text-center space-y-4 relative z-10">
-                    <PieChart className="w-12 h-12 text-muted-foreground mx-auto opacity-20" />
-                    <p className="text-muted-foreground font-medium">Gráficos de distribuição de mídia e sentimento estarão disponíveis na próxima atualização.</p>
+              <div className="md:col-span-2 bg-card/40 border border-white/5 rounded-[2rem] p-8 min-h-[400px] relative overflow-hidden">
+                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                 <h3 className="font-bold text-white mb-8 flex items-center gap-2 relative z-10">
+                    <PieChart className="w-5 h-5 text-primary" />
+                    Distribuição de Mídia no Nicho
+                 </h3>
+                 
+                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative z-10">
+                    {stats?.mediaDistribution?.map((item, i) => (
+                      <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/5 text-center space-y-4">
+                         <p className="text-xs font-bold text-muted-foreground uppercase">{item.type}</p>
+                         <div className="text-4xl font-bold text-white">{item.percentage}</div>
+                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary" style={{ width: item.percentage }} />
+                         </div>
+                      </div>
+                    ))}
+                    {(!stats?.mediaDistribution || stats.mediaDistribution.length === 0) && (
+                      <p className="col-span-3 text-center text-muted-foreground py-20">Faça sua primeira pesquisa para ver as porcentagens reais.</p>
+                    )}
                  </div>
               </div>
               
