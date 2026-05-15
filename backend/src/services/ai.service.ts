@@ -17,30 +17,43 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
 
   try {
     // Format minimal data for the prompt to save tokens and avoid errors
-    const postsSummary = posts.slice(0, 15).map((p, i) => 
-      `${i+1}. Legenda: ${p.caption.substring(0, 100)} | Curtidas: ${p.likesCount} | Comentários: ${p.commentsCount}`
-    ).join('\n');
+    const postsSummary = posts
+      .filter(p => p.caption) // Apenas posts com legenda
+      .slice(0, 15)
+      .map((p, i) => 
+        `${i+1}. Legenda: ${p.caption.substring(0, 80)}... | Likes: ${p.likesCount}`
+      ).join('\n');
  
+    if (!postsSummary) {
+       return {
+          summary: 'Dados insuficientes para análise detalhada.',
+          detectedTrends: 'N/A',
+          suggestedNiche: 'N/A',
+          viralPatterns: 'N/A',
+        };
+    }
+
     const prompt = `
-      Analise estes dados de posts do Instagram sobre "${query}":
+      Analise estes posts do Instagram sobre "${query}":
       ${postsSummary}
       
-      Gere um JSON com:
-      1. summary: Resumo da estratégia (2 frases).
-      2. detectedTrends: 3 principais hashtags ou temas.
-      3. suggestedNiche: Um sub-nicho lucrativo.
-      4. viralPatterns: O que faz esses posts terem likes.
+      Gere um JSON estrito com exatamente estes campos:
+      - summary: Resumo estratégico em 2 frases.
+      - detectedTrends: Top 3 hashtags/temas.
+      - suggestedNiche: Um sub-nicho lucrativo.
+      - viralPatterns: Gatilhos de engajamento encontrados.
  
-      Responda APENAS o JSON.
+      Responda APENAS o JSON, sem markdown.
     `;
  
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "Você é um analista de marketing que responde apenas em JSON." },
+        { role: "system", content: "Você é um especialista em marketing digital. Responda apenas JSON puro." },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      timeout: 25000 // 25 segundos de limite
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
