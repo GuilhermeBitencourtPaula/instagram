@@ -12,6 +12,8 @@ interface Post {
   likesCount: number;
   commentsCount: number;
   username: string;
+  permalink: string;
+  postedAt: string;
 }
 
 export default function ResultCard({ post }: { post: Post }) {
