@@ -57,16 +57,39 @@ export const syncProfile = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Conecte seu Instagram nas configurações primeiro.' });
     }
 
-    // Try Business Discovery
-    // If username starts with ig_user, we might have trouble, but let's try
-    const discoveryData = await instagramService.getBusinessDiscovery(
+    // --- STAGE 1: Direct Sync ---
+    let discoveryData = await instagramService.getBusinessDiscovery(
       config.accessToken,
       config.instagramUserId,
-      profile.username.startsWith('ig_user_') ? profile.username : profile.username
+      profile.username
     );
 
+    // --- STAGE 2: Rescue Username from Permalink (OEmbed) ---
     if (!discoveryData) {
-      return res.status(404).json({ message: 'Não foi possível encontrar dados reais para este perfil na API do Instagram.' });
+      const latestPost = await prisma.post.findFirst({
+        where: { instagramProfileId: profile.id },
+        orderBy: { postedAt: 'desc' }
+      });
+
+      if (latestPost && latestPost.permalink) {
+        logger.info(`Tentando resgate de username via OEmbed para: ${latestPost.permalink}`);
+        const oembed = await instagramService.getOEmbedInfo(config.accessToken, latestPost.permalink);
+        
+        if (oembed && oembed.author_name) {
+          logger.info(`Username resgatado: ${oembed.author_name}. Tentando Business Discovery novamente...`);
+          discoveryData = await instagramService.getBusinessDiscovery(
+            config.accessToken,
+            config.instagramUserId,
+            oembed.author_name
+          );
+        }
+      }
+    }
+
+    if (!discoveryData) {
+      return res.status(404).json({ 
+        message: 'Não foi possível encontrar dados reais. O perfil pode ser privado ou não ser uma conta Profissional.' 
+      });
     }
 
     // Update Profile with Real Data
@@ -77,7 +100,6 @@ export const syncProfile = async (req: Request, res: Response) => {
         fullName: discoveryData.name,
         followersCount: discoveryData.followers_count,
         profilePicUrl: discoveryData.profile_picture_url,
-        // We could also store bio if we had the field
       }
     });
 

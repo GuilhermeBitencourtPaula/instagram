@@ -218,3 +218,21 @@ export const getBusinessDiscovery = async (accessToken: string, instagramUserId:
     return null;
   }
 };
+/**
+ * Get OEmbed Info (Author Name, etc from permalink)
+ */
+export const getOEmbedInfo = async (accessToken: string, permalink: string) => {
+  try {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/instagram_oembed`, {
+      params: {
+        url: permalink,
+        access_token: accessToken,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    logger.error(`Erro no OEmbed para ${permalink}: ${error.message}`);
+    return null;
+  }
+};
