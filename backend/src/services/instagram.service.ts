@@ -63,9 +63,28 @@ export const getInstagramBusinessId = async (accessToken: string): Promise<strin
       },
     });
 
-    const accounts = response.data.accounts?.data;
+    let accounts = response.data.accounts?.data || [];
     
-    if (!accounts || accounts.length === 0) {
+    // FORÇA BRUTA: Se a lista veio vazia, tentamos o ID conhecido da sua página "viryon"
+    if (accounts.length === 0) {
+      console.log('Lista de páginas vazia. Tentando conexão direta com a página viryon (1102322679628518)...');
+      try {
+        const directPage = await axios.get(`${FACEBOOK_GRAPH_URL}/1102322679628518`, {
+          params: {
+            fields: 'instagram_business_account,name',
+            access_token: accessToken,
+          },
+        });
+        if (directPage.data.instagram_business_account) {
+          console.log(`Sucesso na Força Bruta! Instagram encontrado diretamente na página: ${directPage.data.name}`);
+          return directPage.data.instagram_business_account.id;
+        }
+      } catch (e: any) {
+        console.warn('Falha na tentativa de conexão direta:', e.message);
+      }
+    }
+
+    if (accounts.length === 0) {
       console.warn('O Facebook retornou zero páginas (accounts) para este token.');
       return null;
     }
