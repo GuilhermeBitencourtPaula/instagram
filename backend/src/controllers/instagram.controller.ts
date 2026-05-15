@@ -77,24 +77,26 @@ export const handleCallback = async (req: Request, res: Response) => {
     const igUserId = await instagramService.getInstagramBusinessId(longToken);
     
     if (!igUserId) {
-      // DEBUG: Verificando Permissões, Páginas e Identidade do App
-      const [permRes, pageRes, appRes] = await Promise.all([
+      // DEBUG: Verificando Permissões, Páginas, Empresas e Identidade do App
+      const [permRes, pageRes, appRes, bizRes] = await Promise.all([
         axios.get(`https://graph.facebook.com/v17.0/me/permissions`, { params: { access_token: longToken } }),
         axios.get(`https://graph.facebook.com/v17.0/me/accounts`, { params: { access_token: longToken } }),
-        axios.get(`https://graph.facebook.com/v17.0/app`, { params: { access_token: longToken } })
+        axios.get(`https://graph.facebook.com/v17.0/app`, { params: { access_token: longToken } }),
+        axios.get(`https://graph.facebook.com/v17.0/me/businesses`, { params: { access_token: longToken } }).catch(() => ({ data: { data: [] } }))
       ]);
 
       const activePerms = permRes.data.data?.filter((p: any) => p.status === 'granted').map((p: any) => p.permission).join(', ');
       const pagesFound = pageRes.data.data?.map((p: any) => p.name).join(', ') || 'Nenhuma';
+      const bizFound = bizRes.data.data?.map((b: any) => b.name).join(', ') || 'Nenhuma';
 
       return res.status(400).json({ 
         message: 'Não foi possível encontrar uma conta do Instagram Business vinculada a este perfil.',
         debug_info: {
           app_id_in_token: appRes.data.id,
-          app_id_configured: process.env.INSTAGRAM_APP_ID,
           granted_permissions: activePerms,
           pages_count: pageRes.data.data?.length || 0,
-          pages_names: pagesFound
+          pages_names: pagesFound,
+          businesses: bizFound
         }
       });
     }
