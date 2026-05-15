@@ -54,7 +54,7 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
         where: { id: search.id },
         data: { status: 'FAILED' }
       });
-      throw new Error(`Nenhum post recente encontrado para #${hashtagName}.`);
+      throw new Error(`Nenhum post encontrado para #${hashtagName} usando o ID de Instagram ${instagramUserId}. Verifique se a sua conta é Business e se o recurso de Public Content está ativo.`);
     }
 
     // Map to internal structure
