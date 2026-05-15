@@ -16,10 +16,8 @@ export const getAuthUrl = async (req: Request, res: Response) => {
     'instagram_basic',
     'instagram_manage_insights',
     'pages_show_list',
-    'pages_read_engagement',
-    'ads_management',
-    'business_management'
-  ].join(','));
+    'pages_read_engagement'
+  ].join(' '));
 
   // State robusto com userId
   const stateObj = {
