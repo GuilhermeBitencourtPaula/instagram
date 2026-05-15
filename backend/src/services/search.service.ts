@@ -46,8 +46,8 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       throw new Error(`Hashtag #${hashtagName} não encontrada ou erro na API.`);
     }
 
-    // Get Media
-    const rawPosts = await instagramService.getHashtagMedia(config.accessToken, instagramUserId, hashtagId);
+    // Get Media (Mudamos para 'top' para garantir que tragamos posts com conteúdo relevante)
+    const rawPosts = await instagramService.getHashtagMedia(config.accessToken, instagramUserId, hashtagId, 'top');
 
     if (rawPosts.length === 0) {
       await prisma.search.update({
