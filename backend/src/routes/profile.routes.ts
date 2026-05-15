@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getProfiles, getProfileDetails } from '../controllers/profile.controller';
+import { getProfiles, getProfileDetails, syncProfile } from '../controllers/profile.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import { cacheMiddleware } from '../middlewares/cache.middleware';
 
@@ -12,5 +12,8 @@ router.get('/', cacheMiddleware(300), getProfiles);
 
 // @route GET /api/profiles/:id
 router.get('/:id', getProfileDetails);
+
+// @route POST /api/profiles/:id/sync
+router.post('/:id/sync', syncProfile);
 
 export default router;

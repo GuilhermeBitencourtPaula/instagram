@@ -200,3 +200,21 @@ export const getAccountMetrics = async (accessToken: string, instagramUserId: st
     return null;
   }
 };
+/**
+ * Get Business Discovery (Followers, Name, etc from any public business account)
+ */
+export const getBusinessDiscovery = async (accessToken: string, instagramUserId: string, targetUsername: string) => {
+  try {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
+      params: {
+        fields: `business_discovery.username(${targetUsername}){followers_count,media_count,name,username,biography,profile_picture_url}`,
+        access_token: accessToken,
+      },
+    });
+
+    return response.data.business_discovery;
+  } catch (error: any) {
+    logger.error(`Erro no Business Discovery para ${targetUsername}: ${error.response?.data?.error?.message || error.message}`);
+    return null;
+  }
+};
