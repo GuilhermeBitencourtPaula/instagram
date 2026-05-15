@@ -145,3 +145,20 @@ export const getHashtagMedia = async (accessToken: string, instagramUserId: stri
     return [];
   }
 };
+
+/**
+ * Get Instagram Account Type
+ */
+export const getAccountType = async (accessToken: string, instagramUserId: string): Promise<string> => {
+  try {
+    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
+      params: {
+        fields: 'account_type,username',
+        access_token: accessToken,
+      },
+    });
+    return response.data.account_type || 'UNKNOWN';
+  } catch (error: any) {
+    return 'ERROR: ' + (error.response?.data?.error?.message || error.message);
+  }
+};

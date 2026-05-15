@@ -50,11 +50,13 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
     const rawPosts = await instagramService.getHashtagMedia(config.accessToken, instagramUserId, hashtagId, 'top');
 
     if (rawPosts.length === 0) {
+      const accountType = await instagramService.getAccountType(config.accessToken, instagramUserId);
+      
       await prisma.search.update({
         where: { id: search.id },
         data: { status: 'FAILED' }
       });
-      throw new Error(`Nenhum post encontrado para #${hashtagName} usando o ID de Instagram ${instagramUserId}. Verifique se a sua conta é Business e se o recurso de Public Content está ativo.`);
+      throw new Error(`Nenhum post encontrado para #${hashtagName}. Tipo da sua conta: ${accountType}. (A API de Hashtag exige conta BUSINESS)`);
     }
 
     // Map to internal structure
