@@ -66,10 +66,10 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
       caption: post.caption || '',
       mediaUrl: post.media_url || '',
       mediaType: post.media_type,
-      likesCount: post.like_count,
-      commentsCount: post.comments_count,
+      likesCount: post.like_count || 0,
+      commentsCount: post.comments_count || 0,
       postedAt: new Date(post.timestamp),
-      username: post.username
+      username: post.username || `user_${post.id}`
     }));
 
     // 2. Save Data to Database

@@ -134,7 +134,7 @@ export const getHashtagMedia = async (accessToken: string, instagramUserId: stri
     const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${hashtagId}/${endpoint}`, {
       params: {
         user_id: instagramUserId,
-        fields: 'id,caption,media_url,media_type,like_count,comments_count,timestamp,permalink,username',
+        fields: 'id,caption,media_url,media_type,like_count,comments_count,timestamp,permalink',
         access_token: accessToken,
       },
     });
