@@ -29,8 +29,9 @@ import AiInsightsCard from "@/components/analytics/AiInsightsCard";
 import Link from "next/link";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function SearchPage() {
+function SearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchIdFromUrl = searchParams.get("id");
@@ -429,6 +430,21 @@ export default function SearchPage() {
         </AnimatePresence>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center py-32 space-y-6">
+           <Loader2 className="w-10 h-10 animate-spin text-primary" />
+           <p className="text-muted-foreground animate-pulse">Carregando pesquisa...</p>
+        </div>
+      </DashboardLayout>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
 
