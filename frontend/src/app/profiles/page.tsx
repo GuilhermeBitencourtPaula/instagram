@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { InstagramIcon as Instagram } from "@/components/ui/InstagramIcon";
 
 interface Profile {
   id: number;
