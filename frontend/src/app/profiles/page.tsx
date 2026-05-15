@@ -145,18 +145,24 @@ export default function ProfilesPage() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-black text-xl text-white flex items-center gap-2 tracking-tighter group-hover:text-primary transition-colors">
-                      @{profile.username.length > 15 ? profile.username.substring(0, 12) + '...' : profile.username}
+                      @{profile.username.startsWith('ig_user_') ? 'Perfil Mascarado' : (profile.username.length > 15 ? profile.username.substring(0, 12) + '...' : profile.username)}
                     </h3>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
-                      {profile.fullName || 'INSTAGRAM USER'}
-                    </p>
+                    {profile.username.startsWith('ig_user_') ? (
+                      <p className="text-[9px] font-bold text-rose-500/80 uppercase tracking-wider flex items-center gap-1">
+                        Sincronização Pendente
+                      </p>
+                    ) : (
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+                        {profile.fullName || 'INSTAGRAM USER'}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 relative z-10">
                   {[
                     { label: 'Posts', value: profile._count?.posts || 0, color: 'from-purple-500/20' },
-                    { label: 'Seguidores', value: profile.followersCount >= 1000 ? `${(profile.followersCount/1000).toFixed(1)}k` : profile.followersCount, color: 'from-blue-500/20' },
+                    { label: 'Seguidores', value: profile.followersCount > 0 ? (profile.followersCount >= 1000 ? `${(profile.followersCount/1000).toFixed(1)}k` : profile.followersCount) : '--', color: 'from-blue-500/20' },
                     { label: 'Engaj.', value: profile.followersCount > 0 ? (Math.random() * 5 + 2).toFixed(1) + '%' : '--%', color: 'from-rose-500/20', isPrimary: true }
                   ].map((stat, idx) => (
                     <div key={idx} className={cn(

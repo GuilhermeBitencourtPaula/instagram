@@ -64,17 +64,31 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
     let totalLikes = 0;
     let totalComments = 0;
 
-    const scrapedPosts = rawPosts.map(post => {
+    const scrapedPosts = [];
+    for (const post of rawPosts) {
       const likes = post.like_count || 0;
       const comments = post.comments_count || 0;
       totalLikes += likes;
       totalComments += comments;
 
-      // Basic engagement calculation (since we don't have follower count for third-party profiles)
-      // We use a relative engagement score
       const engagement = likes + (comments * 2);
+      let realUsername = post.username || `ig_user_${post.id.split('_')[0]}`;
 
-      return {
+      // --- NEW: PROACTIVE RESCUE ---
+      // If we have a masked username and a permalink, try to rescue it NOW
+      if (realUsername.startsWith('ig_user_') && post.permalink) {
+        try {
+          const oembed = await instagramService.getOEmbedInfo(config.accessToken, post.permalink);
+          if (oembed && oembed.author_name) {
+            realUsername = oembed.author_name;
+            logger.info(`Username resgatado proativamente: ${realUsername}`);
+          }
+        } catch (e) {
+          // Silent fail, use masked
+        }
+      }
+
+      scrapedPosts.push({
         instagramPostId: post.id,
         caption: post.caption || '',
         mediaUrl: post.media_url || '',
@@ -83,10 +97,10 @@ export const processSearchInternal = async (searchId: number, userId: number) =>
         commentsCount: comments,
         estimatedEngage: engagement,
         postedAt: new Date(post.timestamp),
-        username: post.username || `ig_user_${post.id.split('_')[0]}`,
+        username: realUsername,
         permalink: post.permalink
-      };
-    });
+      });
+    }
 
     // 2. Save Data to Database
     for (const post of scrapedPosts) {
