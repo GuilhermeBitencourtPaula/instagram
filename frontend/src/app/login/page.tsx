@@ -38,9 +38,16 @@ export default function LoginPage() {
       const response = await api.post("/auth/login", { email, password });
       const { token, user } = response.data;
 
+      // Garantir salvamento físico imediato para o Middleware
+      localStorage.setItem("token", token);
+      
       setAuth(user, token);
       toast.success(`Bem-vindo de volta, ${user.name}!`);
-      router.push("/dashboard");
+      
+      // Pequeno delay para garantir persistência no navegador
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 100);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Falha no login. Verifique suas credenciais.");
     } finally {
