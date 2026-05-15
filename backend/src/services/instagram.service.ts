@@ -151,13 +151,13 @@ export const getHashtagMedia = async (accessToken: string, instagramUserId: stri
  */
 export const getAccountType = async (accessToken: string, instagramUserId: string): Promise<string> => {
   try {
-    const response = await axios.get(`${FACEBOOK_GRAPH_URL}/${instagramUserId}`, {
+    const response = await axios.get(`https://graph.facebook.com/v12.0/${instagramUserId}`, {
       params: {
-        fields: 'id,username',
+        fields: 'id,username,media_count',
         access_token: accessToken,
       },
     });
-    return `ID: ${response.data.id}, Username: ${response.data.username}`;
+    return `ID: ${response.data.id}, Username: ${response.data.username}, Posts: ${response.data.media_count}`;
   } catch (error: any) {
     return 'ERRO: ' + (error.response?.data?.error?.message || error.message);
   }
