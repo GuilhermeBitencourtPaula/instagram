@@ -119,8 +119,9 @@ export const getHashtagId = async (accessToken: string, instagramUserId: string,
 
     return response.data.data?.[0]?.id || null;
   } catch (error: any) {
-    logger.error(`Error fetching hashtag ID for #${hashtagName}: ${error.response?.data?.error?.message || error.message}`);
-    return null;
+    const errorMsg = error.response?.data?.error?.message || error.message;
+    logger.error(`Erro ao buscar ID da hashtag #${hashtagName}: ${errorMsg}`);
+    throw new Error(`Erro do Facebook: ${errorMsg}`);
   }
 };
 
