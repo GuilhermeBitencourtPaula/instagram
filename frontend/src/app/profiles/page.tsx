@@ -175,13 +175,17 @@ export default function ProfilesPage() {
                     { label: 'Engaj.', value: profile.followersCount > 0 ? (Math.random() * 5 + 2).toFixed(1) + '%' : '--%', isPrimary: true }
                   ].map((stat, idx) => {
                     const valueStr = stat.value.toString();
-                    const fontSizeClass = valueStr.length > 5 ? "text-base" : "text-lg";
+                    // Escala de fonte agressiva para garantir que caiba sem dots
+                    const fontSizeClass = 
+                      valueStr.length > 7 ? "text-[10px]" : 
+                      valueStr.length > 5 ? "text-sm" : 
+                      "text-lg";
                     
                     return (
-                      <div key={idx} className="bg-white/[0.03] border border-white/5 p-4 rounded-3xl text-center transition-all group-hover:bg-white/[0.06] group-hover:border-white/10 min-w-0 flex flex-col justify-center">
-                        <p className="text-[9px] font-black text-muted-foreground mb-1.5 uppercase tracking-tighter opacity-40 leading-none">{stat.label}</p>
+                      <div key={idx} className="bg-white/[0.03] border border-white/5 p-3 rounded-2xl text-center transition-all group-hover:bg-white/[0.06] group-hover:border-white/10 min-w-0 flex flex-col justify-center">
+                        <p className="text-[8px] font-black text-muted-foreground mb-1 uppercase tracking-tighter opacity-40 leading-none">{stat.label}</p>
                         <p className={cn(
-                          "font-black tracking-tight leading-none truncate px-1",
+                          "font-black tracking-tighter leading-none whitespace-nowrap",
                           fontSizeClass,
                           stat.isPrimary ? "text-primary" : "text-white"
                         )}>{stat.value}</p>
