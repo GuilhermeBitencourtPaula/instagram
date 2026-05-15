@@ -63,11 +63,15 @@ export const generateSearchInsights = async (query: string, posts: any[]) => {
   } catch (error: any) {
     console.error('DETALHE ERRO IA:', error);
     logger.error(`Erro ao gerar insights refinados: ${error.message}`);
+    
+    // Retornamos o erro real para o usuário conseguir debugar no painel
+    const errorMsg = error.response?.data?.error?.message || error.message || 'Erro desconhecido';
+    
     return {
-      summary: 'Erro ao processar insights detalhados.',
-      detectedTrends: 'N/A',
-      suggestedNiche: 'N/A',
-      viralPatterns: 'N/A',
+      summary: `Erro na IA: ${errorMsg}. Verifique sua chave e saldo na OpenAI.`,
+      detectedTrends: 'Verifique Logs',
+      suggestedNiche: 'Verifique Logs',
+      viralPatterns: 'Verifique Logs',
     };
   }
 };
