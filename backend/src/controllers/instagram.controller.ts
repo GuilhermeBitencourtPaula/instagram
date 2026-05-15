@@ -124,10 +124,10 @@ export const handleCallback = async (req: Request, res: Response) => {
     logger.info(`Instagram conectado com sucesso para o usuário ${userId}`);
 
     // Redirect back to frontend
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard/settings?status=success`);
+    res.redirect(`${process.env.FRONTEND_URL}/settings?status=success`);
   } catch (error: any) {
     logger.error(`Erro no callback do Instagram: ${error.message}`);
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard/settings?status=error&message=${encodeURIComponent(error.message)}`);
+    res.redirect(`${process.env.FRONTEND_URL}/settings?status=error&message=${encodeURIComponent(error.message)}`);
   }
 };
 
