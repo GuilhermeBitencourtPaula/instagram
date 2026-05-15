@@ -122,32 +122,40 @@ export const processSearch = async (req: Request, res: Response) => {
 
 export const getStats = async (req: Request, res: Response) => {
   const userId = req.user?.userId;
+  const { username } = req.query; // Filtro opcional por perfil
 
   try {
+    // Filtro base para o Prisma
+    const baseWhere: any = { 
+      search: { userId, deletedAt: null } 
+    };
+
+    if (username) {
+      baseWhere.profile = { username: String(username) };
+    }
     const totalSearches = await prisma.search.count({
       where: { userId, deletedAt: null }
     });
 
     const totalPosts = await prisma.post.count({
-      where: { search: { userId, deletedAt: null } }
+      where: baseWhere
     });
 
     const totalInsights = await prisma.aiInsight.count({
-      where: { search: { userId, deletedAt: null } }
+      where: username ? { search: { userId, deletedAt: null, query: { contains: String(username) } } } : { search: { userId, deletedAt: null } }
     });
 
-    // Calculate average engagement
-    const avgEngage = await prisma.post.aggregate({
-      where: { search: { userId, deletedAt: null } },
-      _avg: {
-        likesCount: true
-      }
+    // Cálculo de Engajamento Real (Média de interações por seguidor)
+    const stats = await prisma.post.aggregate({
+      where: baseWhere,
+      _sum: { likesCount: true, commentsCount: true },
+      _count: true
     });
 
     // Media Distribution (Percentages)
     const mediaCounts = await prisma.post.groupBy({
       by: ['mediaType'],
-      where: { search: { userId, deletedAt: null } },
+      where: baseWhere,
       _count: true
     });
 
@@ -170,25 +178,39 @@ export const getStats = async (req: Request, res: Response) => {
       take: 5
     });
 
-    // Get real followers count from connected account
-    const instagramConfig = await prisma.instagramConfig.findFirst({
-      where: { userId }
-    });
-
+    // Buscar seguidores do perfil específico ou média global
     let followersCount = 0;
-    if (instagramConfig) {
-      const metrics = await instagramService.getAccountMetrics(
-        instagramConfig.accessToken,
-        instagramConfig.instagramUserId
-      );
-      if (metrics) followersCount = metrics.followers_count;
+    if (username) {
+      const profile = await prisma.instagramProfile.findFirst({
+        where: { username: String(username) }
+      });
+      followersCount = profile?.followersCount || 0;
+    } else {
+      const instagramConfig = await prisma.instagramConfig.findFirst({
+        where: { userId }
+      });
+      if (instagramConfig) {
+        const metrics = await instagramService.getAccountMetrics(
+          instagramConfig.accessToken,
+          instagramConfig.instagramUserId
+        );
+        followersCount = metrics?.followers_count || 0;
+      }
+    }
+
+    // Fórmula de Engajamento: ((Curtidas + Comentários) / Seguidores) / Total de Posts * 100
+    let avgEngagement = '0%';
+    if (followersCount > 0 && stats._count > 0) {
+      const totalInteractions = (stats._sum.likesCount || 0) + (stats._sum.commentsCount || 0);
+      const engagement = ((totalInteractions / followersCount) / stats._count) * 100;
+      avgEngagement = engagement.toFixed(2) + '%';
     }
 
     res.status(200).json({
       totalSearches,
       totalPosts,
       totalInsights,
-      avgEngagement: avgEngage._avg.likesCount ? (avgEngage._avg.likesCount / 100).toFixed(1) + '%' : '0%',
+      avgEngagement,
       followersCount,
       mediaDistribution: distribution,
       topTags: topTags.map((t: any) => ({ name: t.name, count: t._count.searches }))
