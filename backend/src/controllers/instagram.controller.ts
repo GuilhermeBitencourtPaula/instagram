@@ -27,7 +27,7 @@ export const getAuthUrl = async (req: Request, res: Response) => {
   
   const state = encodeURIComponent(JSON.stringify(stateObj));
 
-  const authUrl = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=${state}`;
+  const authUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=${state}`;
 
   res.json({ url: authUrl });
 };
