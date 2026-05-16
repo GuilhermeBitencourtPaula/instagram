@@ -67,12 +67,12 @@ export default function LandingPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4"
           >
-            <Link href="/register" className="w-full sm:w-auto">
+            <a href="https://pay.cakto.com.br/djtd3ts_886785" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
               <Button className="w-full h-14 md:h-16 px-8 md:px-10 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl text-base md:text-lg font-black shadow-2xl shadow-orange-500/20 group">
                 ACESSAR PAINEL AGORA
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </Link>
+            </a>
             <Link href="#beneficios" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full h-14 md:h-16 px-8 md:px-10 border-white/10 hover:bg-white/5 rounded-2xl text-base md:text-lg font-bold text-slate-300">
                 Ver Demonstração
@@ -244,12 +244,12 @@ export default function LandingPage() {
          
          <div className="max-w-4xl mx-auto text-center space-y-8 md:space-y-12 relative px-4">
             <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight px-2">Pronto para elevar seu <br /> <span className="text-orange-500">jogo estratégico?</span></h2>
-            <Link href="/register" className="w-full sm:w-auto inline-block">
+            <a href="https://pay.cakto.com.br/djtd3ts_886785" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-block">
               <Button className="w-full sm:w-auto h-16 md:h-20 px-8 md:px-16 bg-white text-black hover:bg-slate-200 rounded-2xl md:rounded-3xl text-lg md:text-xl font-black shadow-2xl shadow-white/10 group">
                 COMEÇAR TESTE GRÁTIS
                 <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
               </Button>
-            </Link>
+            </a>
             <div className="pt-12 md:pt-20 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-10 border-t border-white/5">
                <div className="flex items-center gap-2">
                  <Shield className="h-5 w-5 text-orange-500" />
