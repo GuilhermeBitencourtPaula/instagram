@@ -16,6 +16,13 @@ import { InstagramIcon as Instagram } from "@/components/ui/InstagramIcon";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+// LINKS DE CHECKOUT DA CAKTO (Substitua pelos seus links reais abaixo)
+const CHECKOUT_LINKS = {
+  starter: "https://app.cakto.com.br/checkout/seu-link-starter",
+  pro: "https://app.cakto.com.br/checkout/seu-link-pro",
+  elite: "https://app.cakto.com.br/checkout/seu-link-elite"
+};
+
 export default function LandingPage() {
   const features = [
     {
@@ -214,11 +221,11 @@ export default function LandingPage() {
                   <CheckCircle2 className="w-4 h-4 text-primary" /> Histórico de 30 dias
                 </li>
               </ul>
-              <Link href="/register" className="block">
+              <a href={CHECKOUT_LINKS.starter} target="_blank" rel="noopener noreferrer" className="block">
                 <button className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold transition-all">
                   COMEÇAR AGORA
                 </button>
-              </Link>
+              </a>
             </motion.div>
 
             {/* Plan 2: PRO (Featured) */}
@@ -252,11 +259,11 @@ export default function LandingPage() {
                   <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" /> Radar de Hashtags
                 </li>
               </ul>
-              <Link href="/register" className="block">
+              <a href={CHECKOUT_LINKS.pro} target="_blank" rel="noopener noreferrer" className="block">
                 <button className="w-full py-6 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-lg shadow-2xl shadow-primary/40 transition-all hover:scale-105">
                   ASSINAR AGORA
                 </button>
-              </Link>
+              </a>
             </motion.div>
 
             {/* Plan 3: Elite */}
@@ -286,11 +293,11 @@ export default function LandingPage() {
                   <CheckCircle2 className="w-4 h-4 text-primary" /> Acesso Antecipado a Betas
                 </li>
               </ul>
-              <Link href="/register" className="block">
+              <a href={CHECKOUT_LINKS.elite} target="_blank" rel="noopener noreferrer" className="block">
                 <button className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold transition-all">
                   ENTRAR PARA O ELITE
                 </button>
-              </Link>
+              </a>
             </motion.div>
           </div>
 
