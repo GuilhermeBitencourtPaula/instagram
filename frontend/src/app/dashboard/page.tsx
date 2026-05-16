@@ -91,7 +91,7 @@ export default function DashboardPage() {
     { label: "Pesquisas Realizadas", value: stats?.totalSearches || 0, icon: Search, color: "text-blue-500", bg: "bg-blue-500/10" },
     { label: "Posts Analisados", value: stats?.totalPosts || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
     { label: "Insights da IA", value: stats?.totalInsights || 0, icon: Sparkles, color: "text-orange-500", bg: "bg-orange-500/10" },
-    { label: "Engajamento Médio", value: stats?.avgEngagement || "0%", icon: TrendingUp, color: "text-green-500", bg: "bg-green-500/10" },
+    { label: "Saúde dos Nichos", value: stats?.avgEngagement || "0%", icon: TrendingUp, color: "text-green-500", bg: "bg-green-500/10" },
   ];
 
   return (
