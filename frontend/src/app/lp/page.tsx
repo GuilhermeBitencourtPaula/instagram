@@ -10,9 +10,9 @@ import {
   ShieldCheck, 
   ArrowRight,
   CheckCircle2,
-  Instagram,
   LineChart
 } from "lucide-react";
+import { InstagramIcon as Instagram } from "@/components/ui/InstagramIcon";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
