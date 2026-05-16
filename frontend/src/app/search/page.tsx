@@ -90,10 +90,12 @@ function SearchContent() {
 
     setIsSearching(true);
     try {
-      // 1. Criar e processar a pesquisa padrão
+      // 1. Criar e processar a pesquisa padrão (Incluindo a query como tag para o ranking)
+      const queryTag = query.trim().startsWith('#') ? query.trim() : `#${query.trim()}`;
+      
       const createResponse = await api.post("/searches", { 
         query, 
-        tagNames: []
+        tagNames: [queryTag]
       });
       
       const searchId = createResponse.data.id;
