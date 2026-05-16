@@ -172,33 +172,126 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing CTA */}
-      <section id="precos" className="py-32 px-6 text-center">
-        <div className="max-w-3xl mx-auto space-y-10">
-          <h2 className="text-5xl md:text-7xl font-black tracking-tighter italic">Pronto para dominar o mercado?</h2>
-          <p className="text-xl text-slate-400">Entre agora para o grupo de elite que usa dados para crescer no Instagram.</p>
-          
-          <div className="p-10 bg-white/5 border border-white/10 rounded-[3rem] space-y-8 backdrop-blur-xl relative">
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-primary rounded-full text-xs font-black uppercase tracking-widest">Oferta de Lançamento</div>
-            <div className="space-y-2">
-              <span className="text-slate-500 line-through text-lg">R$ 197/mês</span>
-              <div className="flex items-center justify-center gap-1">
-                <span className="text-4xl font-bold">R$</span>
-                <span className="text-8xl font-black tracking-tighter">97</span>
-                <span className="text-2xl font-bold text-slate-500">/mês</span>
+      {/* Pricing Table Section */}
+      <section id="precos" className="py-32 px-6">
+        <div className="max-w-7xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter italic">Escolha seu nível de jogo</h2>
+            <p className="text-slate-400 text-lg">Planos flexíveis para quem busca escala real no Instagram.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+            {/* Plan 1: Starter */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-8 backdrop-blur-md"
+            >
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-300">Starter</h3>
+                <p className="text-sm text-slate-500 font-medium">Ideal para iniciantes</p>
               </div>
-            </div>
-            
-            <Link href="/register">
-              <button className="w-full py-6 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-xl shadow-2xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95">
-                QUERO ACESSO IMEDIATO
-              </button>
-            </Link>
-            
-            <div className="flex items-center justify-center gap-6 text-xs text-slate-500 font-bold uppercase tracking-widest">
-              <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-green-500" /> Garantia 7 Dias</span>
-              <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Cancelamento Fácil</span>
-            </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold">R$</span>
+                <span className="text-6xl font-black tracking-tighter">47</span>
+                <span className="text-slate-500 font-bold">/mês</span>
+              </div>
+              <ul className="space-y-4">
+                <li className="flex items-center gap-3 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> 10 Pesquisas /mês
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> IA de Insights Básica
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> Histórico de 30 dias
+                </li>
+              </ul>
+              <Link href="/register" className="block">
+                <button className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold transition-all">
+                  COMEÇAR AGORA
+                </button>
+              </Link>
+            </motion.div>
+
+            {/* Plan 2: PRO (Featured) */}
+            <motion.div 
+              initial={{ opacity: 0, y: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: -20, scale: 1.05 }}
+              viewport={{ once: true }}
+              className="p-10 bg-gradient-to-b from-primary/30 to-primary/10 border-2 border-primary/50 rounded-[3rem] space-y-8 backdrop-blur-xl relative z-10 shadow-[0_0_50px_rgba(139,92,246,0.2)]"
+            >
+              <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-primary rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">OFERTA DE LANÇAMENTO</div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white">PROFISSIONAL</h3>
+                <p className="text-sm text-primary font-bold uppercase tracking-widest">Mais Vendido</p>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold">R$</span>
+                <span className="text-7xl font-black tracking-tighter">97</span>
+                <span className="text-slate-300 font-bold">/mês</span>
+              </div>
+              <ul className="space-y-4">
+                <li className="flex items-center gap-3 text-sm text-white font-medium">
+                  <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" /> Pesquisas Ilimitadas
+                </li>
+                <li className="flex items-center gap-3 text-sm text-white font-medium">
+                  <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" /> IA Avançada de Sentimentos
+                </li>
+                <li className="flex items-center gap-3 text-sm text-white font-medium">
+                  <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" /> Exportação de PDFs
+                </li>
+                <li className="flex items-center gap-3 text-sm text-white font-medium">
+                  <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" /> Radar de Hashtags
+                </li>
+              </ul>
+              <Link href="/register" className="block">
+                <button className="w-full py-6 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-lg shadow-2xl shadow-primary/40 transition-all hover:scale-105">
+                  ASSINAR AGORA
+                </button>
+              </Link>
+            </motion.div>
+
+            {/* Plan 3: Elite */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-8 backdrop-blur-md"
+            >
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-300">Elite / Agência</h3>
+                <p className="text-sm text-slate-500 font-medium">Dominação total</p>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold">R$</span>
+                <span className="text-6xl font-black tracking-tighter">197</span>
+                <span className="text-slate-500 font-bold">/mês</span>
+              </div>
+              <ul className="space-y-4">
+                <li className="flex items-center gap-3 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> Tudo do Plano PRO
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> Suporte VIP Priority
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> Acesso Antecipado a Betas
+                </li>
+              </ul>
+              <Link href="/register" className="block">
+                <button className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold transition-all">
+                  ENTRAR PARA O ELITE
+                </button>
+              </Link>
+            </motion.div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-8 pt-10 text-[10px] text-slate-500 font-black uppercase tracking-widest opacity-60">
+            <span className="flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-green-500" /> Pagamento 100% Seguro</span>
+            <span className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-green-500" /> Resultados Comprovados</span>
+            <span className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-green-500" /> Garantia Incondicional</span>
           </div>
         </div>
       </section>
