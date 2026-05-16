@@ -18,9 +18,9 @@ import { cn } from "@/lib/utils";
 
 // LINKS DE CHECKOUT DA CAKTO (Substitua pelos seus links reais abaixo)
 const CHECKOUT_LINKS = {
-  starter: "https://app.cakto.com.br/checkout/seu-link-starter",
-  pro: "https://app.cakto.com.br/checkout/seu-link-pro",
-  elite: "https://app.cakto.com.br/checkout/seu-link-elite"
+  starter: "https://pay.cakto.com.br/djtd3ts_886785",
+  pro: "https://pay.cakto.com.br/djtd3ts_886785",
+  elite: "https://pay.cakto.com.br/djtd3ts_886785"
 };
 
 export default function LandingPage() {
