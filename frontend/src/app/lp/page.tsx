@@ -117,12 +117,18 @@ export default function LandingPage() {
                 COMEÇAR AGORA <ArrowRight className="w-5 h-5" />
               </button>
             </Link>
-            <div className="flex -space-x-2">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-[#050505] bg-slate-800" />
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050505] bg-slate-800 overflow-hidden shadow-xl ring-2 ring-white/5">
+                   <img 
+                    src={`/avatars/avatar${i}.png`} 
+                    alt={`Usuário Ativo ${i}`} 
+                    className="w-full h-full object-cover"
+                   />
+                </div>
               ))}
-              <div className="pl-4 text-xs font-medium text-slate-500">
-                +1.2k usuários ativos
+              <div className="pl-6 text-xs font-bold text-slate-400 self-center">
+                +1.2k usuários ativos hoje
               </div>
             </div>
           </motion.div>
