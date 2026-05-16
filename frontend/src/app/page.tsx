@@ -108,7 +108,9 @@ export default function LandingPage() {
                   <div className="hidden lg:block">
                      <div className="flex -space-x-4">
                         {[1,2,3,4].map(i => (
-                          <div key={i} className="h-10 w-10 rounded-full border-2 border-slate-950 bg-slate-800" />
+                          <div key={i} className="h-10 w-10 rounded-full border-2 border-slate-950 bg-slate-800 overflow-hidden">
+                             <img src={`/avatars/avatar${i}.png`} className="w-full h-full object-cover" alt="" />
+                          </div>
                         ))}
                      </div>
                   </div>
@@ -218,7 +220,13 @@ export default function LandingPage() {
                     </div>
                     <p className="text-base md:text-xl font-medium text-slate-300 italic mb-6 md:mb-8 relative z-10">"{d.text}"</p>
                     <div className="flex items-center gap-3 md:gap-4">
-                       <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-800 border border-orange-500/30" />
+                       <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-800 border border-orange-500/30 overflow-hidden">
+                          <img 
+                           src={d.name === "Guilherme Paula" ? "/avatars/guilherme.png" : "/avatars/ricardo.png"} 
+                           className="w-full h-full object-cover" 
+                           alt={d.name} 
+                          />
+                       </div>
                        <div>
                           <p className="font-black text-sm md:text-base text-white">{d.name}</p>
                           <p className="text-[10px] font-bold text-slate-500 uppercase">{d.role}</p>
